@@ -66,7 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close auth overlay
         closeAuthBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                authOverlay.classList.remove('active');
+                if (authOverlay) {
+                    authOverlay.classList.remove('active');
+                } else {
+                    console.warn('authOverlay element not found, cannot close overlay.');
+                }
             });
         });
         
@@ -392,49 +396,63 @@ document.addEventListener('DOMContentLoaded', () => {
             signupMessage.textContent = 'Submitting application...';
             signupMessage.className = 'form-message';
 
-            try {
-                // **1. Firebase App Check Token**
-                const appCheckTokenResponse = await grecaptcha.enterprise.execute('YOUR_RECAPTCHA_SITE_KEY', {
-                    action: 'beta_signup'
-                });
-                const appCheckToken = appCheckTokenResponse;
+            const checkRecaptchaReady = () => { // ✅ Function to check reCaptcha readiness
+                if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
+                    // reCAPTCHA is ready, execute the code
+                    executeRecaptcha();
+                } else {
+                    // reCAPTCHA not yet ready, try again after a short delay
+                    setTimeout(checkRecaptchaReady, 300); // Retry after 300ms
+                }
+            };
 
-                // **2. Create User with Email and Password (for verification)**
-                const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, generateRandomPassword());
-                const user = userCredential.user;
+            const executeRecaptcha = async () => { // ✅ Function to execute reCaptcha and form submission
+                try {
+                    // **1. Firebase App Check Token**
+                    const appCheckTokenResponse = await grecaptcha.enterprise.execute('YOUR_RECAPTCHA_SITE_KEY', {
+                        action: 'beta_signup'
+                    });
+                    const appCheckToken = appCheckTokenResponse;
 
-                // **3. Send Email Verification**
-                await sendEmailVerification(user);
+                    // **2. Create User with Email and Password (for verification)**
+                    const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, generateRandomPassword());
+                    const user = userCredential.user;
 
-                // **4. Save Application Data to Firebase**
-                const applicationsRef = ref(database, 'applications');
-                const newApplicationRef = child(applicationsRef, `${Date.now()}`);
+                    // **3. Send Email Verification**
+                    await sendEmailVerification(user);
 
-                const applicationData = {
-                    name: formValues.name,
-                    email: formValues.email,
-                    playdateOwner: formValues['playdate-owner'],
-                    experience: formValues.experience || '',
-                    timestamp: new Date().toISOString(),
-                    status: 'pending',
-                    project: '8ball',
-                    appCheckToken: appCheckToken
-                };
+                    // **4. Save Application Data to Firebase**
+                    const applicationsRef = ref(database, 'applications');
+                    const newApplicationRef = child(applicationsRef, `${Date.now()}`);
 
-                await set(newApplicationRef, applicationData);
+                    const applicationData = {
+                        name: formValues.name,
+                        email: formValues.email,
+                        playdateOwner: formValues['playdate-owner'],
+                        experience: formValues.experience || '',
+                        timestamp: new Date().toISOString(),
+                        status: 'pending',
+                        project: '8ball',
+                        appCheckToken: appCheckToken
+                    };
 
-                // **5. Show Success Message**
-                signupMessage.textContent = 'Application submitted! Please check your email to verify your address.';
-                signupMessage.className = 'form-message success';
+                    await set(newApplicationRef, applicationData);
 
-                // Clear the form
-                betaSignupForm.reset();
+                    // **5. Show Success Message**
+                    signupMessage.textContent = 'Application submitted! Please check your email to verify your address.';
+                    signupMessage.className = 'form-message success';
 
-            } catch (error) {
-                console.error("Error during beta application:", error);
-                signupMessage.textContent = 'Error submitting application. Please try again later.';
-                signupMessage.className = 'form-message error';
-            }
+                    // Clear the form
+                    betaSignupForm.reset();
+
+                } catch (error) {
+                    console.error("Error during beta application:", error);
+                    signupMessage.textContent = 'Error submitting application. Please try again later.';
+                    signupMessage.className = 'form-message error';
+                }
+            };
+
+            checkRecaptchaReady(); // ✅ Initial call to check reCaptcha readiness
         });
     }
 
@@ -626,22 +644,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            if (this.getAttribute('href') === '#notify-me' || 
+            if (this.getAttribute('href') === '#notify-me' ||
                 this.getAttribute('href') === '#login' ||
                 this.classList.contains('close-auth-redirect')) {
                 return; // Skip processing, handled by other handlers
             }
-            
+
             e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+
+            const targetHref = this.getAttribute('href');
+            if (targetHref && targetHref !== "#") {
+                const targetId = targetHref;
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            } else {
+                console.warn('Invalid or empty href attribute, smooth scroll skipped.');
             }
         });
     });
