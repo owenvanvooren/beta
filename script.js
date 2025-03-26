@@ -1134,6 +1134,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const feedbackListRef = ref(database, `feedback/${feedbackType}`);
             const newFeedbackRef = child(feedbackListRef, `${Date.now()}`);
             
+            grecaptcha.execute('6Ldr8AArAAAAACctZPXwyDAfeLvssTedGAUX27_3', {action: 'login'}).then(function(token) {
+                // Add token to your form
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'g-recaptcha-response';
+                input.value = token;
+                form.appendChild(input);
+                // Continue with form submission
+            });
+            
             set(newFeedbackRef, data)
                 .then(() => {
                     // Clear the form
