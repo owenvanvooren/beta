@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const auth = window.firebaseAuth;
     const database = window.firebaseDatabase;
     const { ref, set, get, child, onValue } = window.firebaseRefs;
-    const { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification } = window.firebaseAuthFunctions;
+    const { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } = window.firebaseAuthFunctions;
     
     // DOM Elements
     const authOverlay = document.getElementById('auth-overlay');
@@ -391,31 +391,77 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Save application to Firebase
                 const applicationsRef = ref(database, 'applications');
-                const newApplicationRef = child(applicationsRef, `${Date.now()}`);
                 
-                const applicationData = {
-                    name: formValues.name,
-                    email: formValues.email,
-                    playdateOwner: formValues['playdate-owner'],
-                    experience: formValues.experience || '',
-                    timestamp: new Date().toISOString(),
-                    status: 'pending',
-                    project: '8ball'
-                };
-                
-                // Create a temporary user account for verification
-                const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, generateTempPassword());
-                const user = userCredential.user;
-                
-                // Send verification email
-                await sendEmailVerification(user, {
-                    url: `https://beta.owen.uno?email=${formValues.email}`,
-                    handleCodeInApp: false,
-                });
-                
-                // Save application data with the user ID
-                applicationData.userId = user.uid;
-                await set(newApplicationRef, applicationData);
+                // First check if user already exists
+                try {
+                    // Try to sign in with a temporary password
+                    const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, generateTempPassword());
+                    const user = userCredential.user;
+                    
+                    // Send verification email
+                    await sendEmailVerification(user, {
+                        url: `https://beta.owen.uno?email=${formValues.email}`,
+                        handleCodeInApp: false,
+                    });
+                    
+                    // Save application data with the user ID
+                    const newApplicationRef = child(applicationsRef, `${Date.now()}`);
+                    const applicationData = {
+                        name: formValues.name,
+                        email: formValues.email,
+                        playdateOwner: formValues['playdate-owner'],
+                        experience: formValues.experience || '',
+                        timestamp: new Date().toISOString(),
+                        status: 'pending',
+                        project: '8ball',
+                        userId: user.uid
+                    };
+                    
+                    await set(newApplicationRef, applicationData);
+                    
+                } catch (authError) {
+                    // If user already exists but needs a new verification email
+                    if (authError.code === 'auth/email-already-in-use') {
+                        // Check if application already exists for this email
+                        const applicationsSnapshot = await get(applicationsRef);
+                        let applicationExists = false;
+                        
+                        if (applicationsSnapshot.exists()) {
+                            const applications = applicationsSnapshot.val();
+                            Object.values(applications).forEach(app => {
+                                if (app.email === formValues.email) {
+                                    applicationExists = true;
+                                }
+                            });
+                        }
+                        
+                        if (!applicationExists) {
+                            // Create new application without creating user
+                            const newApplicationRef = child(applicationsRef, `${Date.now()}`);
+                            const applicationData = {
+                                name: formValues.name,
+                                email: formValues.email,
+                                playdateOwner: formValues['playdate-owner'],
+                                experience: formValues.experience || '',
+                                timestamp: new Date().toISOString(),
+                                status: 'pending',
+                                project: '8ball'
+                            };
+                            
+                            await set(newApplicationRef, applicationData);
+                        }
+                        
+                        // Try to send a reset password email instead, which will serve as verification
+                        await sendPasswordResetEmail(auth, formValues.email, {
+                            url: `https://beta.owen.uno?email=${formValues.email}`,
+                            handleCodeInApp: false
+                        });
+                        
+                        throw new Error('email-already-registered-resent');
+                    } else {
+                        throw authError;
+                    }
+                }
                 
                 // Show success message
                 const formContainer = betaSignupForm.parentElement;
@@ -436,8 +482,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error with application submission:", error);
                 
                 let errorMessage = "There was an error submitting your application. Please try again.";
+                
                 if (error.code === 'auth/email-already-in-use') {
                     errorMessage = "You've already applied with this email address. If you haven't received a verification email, check your spam folder.";
+                } else if (error.message === 'email-already-registered-resent') {
+                    // Custom success message for resending verification
+                    const formContainer = betaSignupForm.parentElement;
+                    formContainer.innerHTML = `
+                        <div class="success-message">
+                            <h2>🔄 Verification Email Resent</h2>
+                            <p>This email address is already registered for beta testing.</p>
+                            <p>We've resent a verification email to <strong>${formValues.email}</strong>.</p>
+                            <p>Please check your inbox (and spam folder) to complete verification.</p>
+                            <a href="#current-betas" class="btn-primary">Back to Beta Tests</a>
+                        </div>
+                    `;
+                    
+                    // Scroll to the success message
+                    formContainer.scrollIntoView({ behavior: 'smooth' });
+                    return;
                 }
                 
                 alert(errorMessage);

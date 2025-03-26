@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -281,7 +282,7 @@
         import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
         import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app-check.js";
-        import { sendEmailVerification, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { sendEmailVerification, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -322,7 +323,8 @@
             signInWithEmailAndPassword: signInWithEmailAndPassword,
             signOut: signOut,
             createUserWithEmailAndPassword: createUserWithEmailAndPassword,
-            sendEmailVerification: sendEmailVerification
+            sendEmailVerification: sendEmailVerification,
+            sendPasswordResetEmail: sendPasswordResetEmail
         };
     </script>
 
