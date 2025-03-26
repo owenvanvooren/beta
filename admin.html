@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | Beta Testing</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .admin-section {
+            padding: 2rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .admin-login {
+            max-width: 500px;
+            margin: 5rem auto;
+        }
+        
+        .admin-dashboard {
+            display: none;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+        
+        .tab-button.active {
+            opacity: 1;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .application-card, .feedback-card {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+        
+        .application-card h3, .feedback-card h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .application-controls, .feedback-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: var(--accent-color);
+            color: var(--dark-color);
+        }
+        
+        .status-approved {
+            background-color: #dff9e3;
+            color: #28a745;
+        }
+        
+        .status-rejected {
+            background-color: #ffe3e3;
+            color: #dc3545;
+        }
+
+        .beta-code-display {
+            background-color: #eee;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="https://owen.uno">owen.uno</a>
+                <span class="beta-badge">beta</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Beta Site</a></li>
+                    <li id="admin-auth-status"><a href="#" id="admin-logout" style="display: none;">Log Out</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="admin-login" class="admin-section admin-login">
+            <h2>Admin Login</h2>
+            <p>Please log in with your administrator credentials.</p>
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-email">Email</label>
+                    <input type="email" id="admin-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Log In</button>
+            </form>
+        </section>
+
+        <section id="admin-dashboard" class="admin-dashboard">
+            <h1>Beta Testing Admin Dashboard</h1>
+            <p>Manage beta test applications and review feedback.</p>
+
+            <div class="tab-navigation">
+                <button class="tab-button active" data-tab="applications">Applications</button>
+                <button class="tab-button" data-tab="feedback">Feedback</button>
+                <button class="tab-button" data-tab="beta-codes">Beta Codes</button>
+            </div>
+
+            <div id="applications-tab" class="tab-content active">
+                <h2>Beta Test Applications</h2>
+                <div id="applications-container">
+                    <p>Loading applications...</p>
+                </div>
+            </div>
+
+            <div id="feedback-tab" class="tab-content">
+                <h2>Beta Tester Feedback</h2>
+                <div id="feedback-container">
+                    <p>Loading feedback...</p>
+                </div>
+            </div>
+
+            <div id="beta-codes-tab" class="tab-content">
+                <h2>Beta Codes Management</h2>
+                <div class="admin-section">
+                    <h3>Generate New Beta Code</h3>
+                    <form id="generate-code-form">
+                        <div class="form-group">
+                            <label for="code-project">Project</label>
+                            <select id="code-project" required>
+                                <option value="8ball">8ball for Playdate</option>
+                                <option value="mystery-macos">Mystery macOS Project</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="code-email">Assign to Email (optional)</label>
+                            <input type="email" id="code-email" placeholder="Leave blank to generate unassigned code">
+                        </div>
+                        <button type="submit" class="btn-primary">Generate Code</button>
+                    </form>
+                </div>
+                <div id="beta-codes-container">
+                    <p>Loading beta codes...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="https://owen.uno">owen.uno</a>
+                    <span class="beta-badge">beta</span>
+                </div>
+                <p>Made with ♡ by Owen Van Vooren</p>
+                <div class="footer-links">
+                    <a href="https://owen.uno">Main Site</a>
+                    <a href="index.html">Beta Site</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+        import { getDatabase, ref, set, get, child, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app-check.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDclD_OzKrJhYkVjwWnd5VY-Q0Im6JDFPU",
+            authDomain: "owen-uno-beta.firebaseapp.com",
+            projectId: "owen-uno-beta",
+            storageBucket: "owen-uno-beta.firebaseapp.com",
+            messagingSenderId: "146588456357",
+            appId: "1:146588456357:web:cf1f25db2b38086155044c",
+            measurementId: "G-M570CEYENP",
+            databaseURL: "https://owen-uno-beta-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        
+        // Initialize App Check
+        const appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider('6Lf35gArAAAAABa2LSIqwTxn2A5m7Jgh0bQ20pfE'),
+          isTokenAutoRefreshEnabled: true
+        });
+
+        // Admin Authentication
+        const adminLoginForm = document.getElementById('admin-login-form');
+        const adminLoginSection = document.getElementById('admin-login');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const adminLogout = document.getElementById('admin-logout');
+        const adminAuthStatus = document.getElementById('admin-auth-status');
+
+        // Tab Navigation
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Content containers
+        const applicationsContainer = document.getElementById('applications-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const betaCodesContainer = document.getElementById('beta-codes-container');
+        const generateCodeForm = document.getElementById('generate-code-form');
+
+        // Handle admin login
+        adminLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+            
+            try {
+                // Sign in with Firebase Auth
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                // Check if user is an admin
+                const userRef = ref(database, `admins/${auth.currentUser.uid}`);
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    // User is an admin
+                    adminLoginSection.style.display = 'none';
+                    adminDashboard.style.display = 'block';
+                    adminLogout.style.display = 'block';
+                    
+                    // Load data
+                    loadApplications();
+                    loadFeedback();
+                    loadBetaCodes();
+                } else {
+                    // User is not an admin
+                    alert('You do not have admin privileges.');
+                    await signOut(auth);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please check your credentials.');
+            }
+        });
+
+        // Handle admin logout
+        adminLogout.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            try {
+                await signOut(auth);
+                adminLoginSection.style.display = 'block';
+                adminDashboard.style.display = 'none';
+                adminLogout.style.display = 'none';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Check auth state on page load
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Check if user is an admin
+                const userRef = ref(database, `admins/${user.uid}`);
+                const snapshot = await get(userRef);
+                
+                if (snapshot.exists()) {
+                    // User is an admin
+                    adminLoginSection.style.display = 'none';
+                    adminDashboard.style.display = 'block';
+                    adminLogout.style.display = 'block';
+                    
+                    // Load data
+                    loadApplications();
+                    loadFeedback();
+                    loadBetaCodes();
+                } else {
+                    // User is not an admin
+                    await signOut(auth);
+                }
+            } else {
+                // User is not logged in
+                adminLoginSection.style.display = 'block';
+                adminDashboard.style.display = 'none';
+                adminLogout.style.display = 'none';
+            }
+        });
+
+        // Tab switching
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                
+                // Update active tab button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show active tab content
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Load applications
+        async function loadApplications() {
+            const applicationsRef = ref(database, 'applications');
+            
+            onValue(applicationsRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const applications = snapshot.val();
+                    let html = '';
+                    
+                    // Sort by timestamp (newest first)
+                    const appArray = Object.entries(applications).map(([id, app]) => ({
+                        id,
+                        ...app
+                    })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    appArray.forEach(app => {
+                        let statusClass = '';
+                        switch(app.status) {
+                            case 'pending': statusClass = 'status-pending'; break;
+                            case 'approved': statusClass = 'status-approved'; break;
+                            case 'rejected': statusClass = 'status-rejected'; break;
+                        }
+                        
+                        html += `
+                            <div class="application-card" data-id="${app.id}">
+                                <span class="status-badge ${statusClass}">${app.status}</span>
+                                <h3>${app.name}</h3>
+                                <p><strong>Email:</strong> ${app.email}</p>
+                                <p><strong>Project:</strong> ${app.project}</p>
+                                <p><strong>Playdate Owner:</strong> ${app.playdateOwner}</p>
+                                <p><strong>Applied:</strong> ${new Date(app.timestamp).toLocaleString()}</p>
+                                <p><strong>Experience:</strong> ${app.experience || 'None specified'}</p>
+                                
+                                ${app.status === 'approved' && app.betaCode ? `
+                                    <div class="beta-code-display">Beta Code: ${app.betaCode}</div>
+                                ` : ''}
+                                
+                                ${app.status === 'pending' ? `
+                                    <div class="application-controls">
+                                        <button class="btn-primary approve-btn" data-id="${app.id}">Approve</button>
+                                        <button class="btn-outline reject-btn" data-id="${app.id}">Reject</button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    applicationsContainer.innerHTML = html || '<p>No applications found.</p>';
+                    
+                    // Add event listeners to action buttons
+                    document.querySelectorAll('.approve-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => approveApplication(e.target.dataset.id));
+                    });
+                    
+                    document.querySelectorAll('.reject-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => rejectApplication(e.target.dataset.id));
+                    });
+                } else {
+                    applicationsContainer.innerHTML = '<p>No applications found.</p>';
+                }
+            });
+        }
+
+        // Load feedback
+        async function loadFeedback() {
+            const feedbackRef = ref(database, 'feedback');
+            
+            onValue(feedbackRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const feedback = snapshot.val();
+                    let html = '';
+                    
+                    // Process bug reports
+                    if (feedback.bugs) {
+                        html += '<h3>Bug Reports</h3>';
+                        
+                        // Sort by timestamp (newest first)
+                        const bugArray = Object.entries(feedback.bugs).map(([id, bug]) => ({
+                            id,
+                            type: 'bug',
+                            ...bug
+                        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        bugArray.forEach(bug => {
+                            html += `
+                                <div class="feedback-card" data-id="${bug.id}" data-type="${bug.type}">
+                                    <h3>${bug.title}</h3>
+                                    <p><strong>Severity:</strong> ${bug.severity}</p>
+                                    <p><strong>Submitted by:</strong> ${bug.submittedBy}</p>
+                                    <p><strong>Project:</strong> ${bug.project}</p>
+                                    <p><strong>Date:</strong> ${new Date(bug.timestamp).toLocaleString()}</p>
+                                    <p><strong>Details:</strong> ${bug.details}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Process feature suggestions
+                    if (feedback.features) {
+                        html += '<h3>Feature Suggestions</h3>';
+                        
+                        // Sort by timestamp (newest first)
+                        const featureArray = Object.entries(feedback.features).map(([id, feature]) => ({
+                            id,
+                            type: 'feature',
+                            ...feature
+                        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        featureArray.forEach(feature => {
+                            html += `
+                                <div class="feedback-card" data-id="${feature.id}" data-type="${feature.type}">
+                                    <h3>${feature.title}</h3>
+                                    <p><strong>Submitted by:</strong> ${feature.submittedBy}</p>
+                                    <p><strong>Project:</strong> ${feature.project}</p>
+                                    <p><strong>Date:</strong> ${new Date(feature.timestamp).toLocaleString()}</p>
+                                    <p><strong>Details:</strong> ${feature.details}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    // Process experiences
+                    if (feedback.experiences) {
+                        html += '<h3>Experience Reports</h3>';
+                        
+                        // Sort by timestamp (newest first)
+                        const expArray = Object.entries(feedback.experiences).map(([id, exp]) => ({
+                            id,
+                            type: 'experience',
+                            ...exp
+                        })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        
+                        expArray.forEach(exp => {
+                            html += `
+                                <div class="feedback-card" data-id="${exp.id}" data-type="${exp.type}">
+                                    <h3>Experience Report (${exp.rating}/5 stars)</h3>
+                                    <p><strong>Submitted by:</strong> ${exp.submittedBy}</p>
+                                    <p><strong>Project:</strong> ${exp.project}</p>
+                                    <p><strong>Date:</strong> ${new Date(exp.timestamp).toLocaleString()}</p>
+                                    <p><strong>Details:</strong> ${exp.details}</p>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    feedbackContainer.innerHTML = html || '<p>No feedback found.</p>';
+                } else {
+                    feedbackContainer.innerHTML = '<p>No feedback found.</p>';
+                }
+            });
+        }
+
+        // Load beta codes
+        async function loadBetaCodes() {
+            const betaCodesRef = ref(database, 'betaCodes');
+            
+            onValue(betaCodesRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const betaCodes = snapshot.val();
+                    let html = '<h3>Existing Beta Codes</h3>';
+                    
+                    // Convert to array and sort (unassigned first, then by date)
+                    const codesArray = Object.entries(betaCodes).map(([id, code]) => ({
+                        id,
+                        ...code
+                    })).sort((a, b) => {
+                        if (!a.email && b.email) return -1;
+                        if (a.email && !b.email) return 1;
+                        return new Date(b.created || 0) - new Date(a.created || 0);
+                    });
+                    
+                    codesArray.forEach(code => {
+                        html += `
+                            <div class="application-card" data-id="${code.id}">
+                                <h3>Code: ${code.code}</h3>
+                                <p><strong>Project:</strong> ${code.project}</p>
+                                <p><strong>Status:</strong> ${code.email ? `Assigned to ${code.email}` : 'Unassigned'}</p>
+                                <p><strong>Created:</strong> ${code.created ? new Date(code.created).toLocaleString() : 'Unknown'}</p>
+                            </div>
+                        `;
+                    });
+                    
+                    betaCodesContainer.innerHTML = html;
+                } else {
+                    betaCodesContainer.innerHTML = '<p>No beta codes found.</p>';
+                }
+            });
+        }
+
+        // Approve application
+        async function approveApplication(id) {
+            try {
+                // Get application data
+                const appRef = ref(database, `applications/${id}`);
+                const snapshot = await get(appRef);
+                
+                if (snapshot.exists()) {
+                    const application = snapshot.val();
+                    
+                    // Generate a beta code
+                    const betaCode = generateBetaCode();
+                    
+                    // Save beta code to database
+                    const betaCodesRef = ref(database, 'betaCodes');
+                    const newBetaCodeRef = push(betaCodesRef);
+                    
+                    await set(newBetaCodeRef, {
+                        code: betaCode,
+                        email: application.email,
+                        project: application.project,
+                        created: new Date().toISOString()
+                    });
+                    
+                    // Update application status
+                    await update(appRef, {
+                        status: 'approved',
+                        betaCode: betaCode,
+                        approvedAt: new Date().toISOString()
+                    });
+                    
+                    // TODO: Send approval email with beta code
+                    // This requires a server component or Firebase Cloud Functions
+                    
+                    alert(`Application approved! Beta code: ${betaCode}`);
+                }
+            } catch (error) {
+                console.error('Error approving application:', error);
+                alert('Error approving application. Please try again.');
+            }
+        }
+
+        // Reject application
+        async function rejectApplication(id) {
+            if (confirm('Are you sure you want to reject this application?')) {
+                try {
+                    // Update application status
+                    const appRef = ref(database, `applications/${id}`);
+                    await update(appRef, {
+                        status: 'rejected',
+                        rejectedAt: new Date().toISOString()
+                    });
+                    
+                    // TODO: Send rejection email
+                    // This requires a server component or Firebase Cloud Functions
+                    
+                    alert('Application rejected.');
+                } catch (error) {
+                    console.error('Error rejecting application:', error);
+                    alert('Error rejecting application. Please try again.');
+                }
+            }
+        }
+
+        // Generate beta code form
+        generateCodeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const project = document.getElementById('code-project').value;
+            const email = document.getElementById('code-email').value.trim() || null;
+            
+            try {
+                // Generate a beta code
+                const betaCode = generateBetaCode();
+                
+                // Save beta code to database
+                const betaCodesRef = ref(database, 'betaCodes');
+                const newBetaCodeRef = push(betaCodesRef);
+                
+                await set(newBetaCodeRef, {
+                    code: betaCode,
+                    email: email,
+                    project: project,
+                    created: new Date().toISOString()
+                });
+                
+                alert(`Beta code generated: ${betaCode}`);
+                generateCodeForm.reset();
+            } catch (error) {
+                console.error('Error generating beta code:', error);
+                alert('Error generating beta code. Please try again.');
+            }
+        });
+
+        // Generate a random beta code
+        function generateBetaCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar-looking characters
+            let code = '';
+            
+            // Generate 4 groups of 4 characters
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                if (i < 3) code += '-';
+            }
+            
+            return code;
+        }
+
+        // Helper function to create a push reference
+        function push(ref) {
+            const key = generatePushID();
+            return child(ref, key);
+        }
+
+        // Generate a Firebase push ID
+        function generatePushID() {
+            // Implementation based on Firebase's push ID algorithm
+            const PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
+            let now = new Date().getTime();
+            const timeStampChars = new Array(8);
+            
+            for (let i = 7; i >= 0; i--) {
+                timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
+                now = Math.floor(now / 64);
+            }
+            
+            let id = '';
+            for (let i = 0; i < 8; i++) {
+                id += timeStampChars[i];
+            }
+            
+            // Add 12 random characters
+            for (let i = 0; i < 12; i++) {
+                id += PUSH_CHARS.charAt(Math.floor(Math.random() * 64));
+            }
+            
+            return id;
+        }
+    </script>
+</body>
+</html>

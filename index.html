@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beta Testing | Owen Van Vooren</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <a href="https://owen.uno">owen.uno</a>
+                <span class="beta-badge">beta</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#current-betas">Current Betas</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#feedback">Feedback</a></li>
+                    <li id="auth-status"><a href="#login" id="login-link">Log In</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div id="auth-overlay" class="auth-overlay">
+            <div class="auth-container">
+                <span class="close-auth">&times;</span>
+                <div id="auth-content">
+                    <div id="login-section">
+                        <h2>Log In to Beta Access</h2>
+                        <p>Enter your beta code to access test builds and submit feedback.</p>
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label for="beta-code">Beta Code</label>
+                                <input type="text" id="beta-code" name="betaCode" required placeholder="Enter your unique beta code">
+                            </div>
+                            <div class="form-group">
+                                <label for="login-email">Email</label>
+                                <input type="email" id="login-email" name="email" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Log In</button>
+                        </form>
+                        <p class="auth-message">Don't have a code? <a href="#signup-8ball" class="close-auth-redirect">Apply for beta access</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="hero">
+            <div class="container">
+                <h1>Help shape <span class="highlight">awesome</span> software!</h1>
+                <p>Test out my newest creations before they're officially released and give feedback that actually matters.</p>
+                <a href="#current-betas" class="btn-primary">See Current Betas</a>
+            </div>
+        </section>
+
+        <section id="current-betas" class="betas">
+            <div class="container">
+                <h2>Current Beta Tests</h2>
+                <div class="beta-cards">
+                    <div class="beta-card featured">
+                        <div class="card-content">
+                            <span class="beta-tag">New!</span>
+                            <img src="images/8ball-playdate.png" alt="8ball for Playdate">
+                            <h3>8ball</h3>
+                            <p class="platform">Playdate Console</p>
+                            <p class="description">Predict your future with a not-so-magic 8 ball. Test your fate with the flip of a coin.</p>
+                            <div class="card-actions">
+                                <a href="#signup-8ball" class="btn-secondary">Join Beta</a>
+                                <span class="beta-status">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="beta-card coming-soon">
+                        <div class="card-content">
+                            <span class="coming-soon-tag">Coming Soon</span>
+                            <div class="placeholder-image">?</div>
+                            <h3>███████</h3>
+                            <p class="platform">macOS</p>
+                            <p class="description">Something foggy is on the horizon... Sign up to be the first to know what's happening!</p>
+                            <div class="card-actions">
+                                <a href="#notify-me" class="btn-outline">Notify Me</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="how-it-works">
+            <div class="container">
+                <h2>How Beta Testing Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Sign Up</h3>
+                        <p>Choose a beta that interests you and fill out the quick sign-up form.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Download & Play</h3>
+                        <p>Get access to the beta version and start testing it out!</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Share Feedback</h3>
+                        <p>Tell me what works, what doesn't, and any wild ideas you have.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Earn Credits</h3>
+                        <p>Helpful testers get credits toward future releases and special perks!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="signup-8ball" class="signup">
+            <div class="container">
+                <h2>Join the 8ball Beta</h2>
+                <p>Be one of the first to try 8ball, exclusively on Playdate!</p>
+                <form id="beta-signup-form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="playdate-owner">Do you own a Playdate?</label>
+                        <select id="playdate-owner" name="playdate-owner" required>
+                            <option value="">Select one...</option>
+                            <option value="yes">Yes, I have one</option>
+                            <option value="soon">No, but I have one on order</option>
+                            <option value="no">No, but I'm interested anyway</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">Previous beta testing experience?</label>
+                        <textarea id="experience" name="experience" rows="4"></textarea>
+                    </div>
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to provide <b>constructive</b> feedback and report any bugs I find</label>
+                    </div>
+                    <button type="submit" class="btn-primary">Submit Application</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="feedback" class="feedback">
+            <div class="container">
+                <h2>Feedback Portal</h2>
+                <p>Already a beta tester? Share your thoughts, report bugs, or suggest improvements!</p>
+                <div id="feedback-login-prompt">
+                    <p class="login-prompt">Please <a href="#login" class="login-link">log in with your beta code</a> to submit feedback.</p>
+                </div>
+                <div id="feedback-forms" class="feedback-forms hidden">
+                    <div class="feedback-options">
+                        <div id="bug-report" class="feedback-option">
+                            <div class="icon">🐞</div>
+                            <h3>Report a Bug</h3>
+                            <p>Found something that's not working right? Let me know!</p>
+                            <form id="bug-report-form" class="feedback-form">
+                                <div class="form-group">
+                                    <label for="bug-title">Bug Title</label>
+                                    <input type="text" id="bug-title" name="title" required placeholder="Brief description of the issue">
+                                </div>
+                                <div class="form-group">
+                                    <label for="bug-details">Bug Details</label>
+                                    <textarea id="bug-details" name="details" rows="5" required placeholder="Steps to reproduce, expected behavior, actual behavior..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="bug-severity">Severity</label>
+                                    <select id="bug-severity" name="severity">
+                                        <option value="low">Low - Minor issue</option>
+                                        <option value="medium" selected>Medium - Affects functionality</option>
+                                        <option value="high">High - Makes feature unusable</option>
+                                        <option value="critical">Critical - Crashes the app</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary">Submit Bug Report</button>
+                            </form>
+                        </div>
+                        <div id="feature-suggestion" class="feedback-option">
+                            <div class="icon">💡</div>
+                            <h3>Suggest a Feature</h3>
+                            <p>Have a brilliant idea to make things better? I'm all ears!</p>
+                            <form id="feature-form" class="feedback-form">
+                                <div class="form-group">
+                                    <label for="feature-title">Feature Title</label>
+                                    <input type="text" id="feature-title" name="title" required placeholder="Name your brilliant idea">
+                                </div>
+                                <div class="form-group">
+                                    <label for="feature-details">Feature Details</label>
+                                    <textarea id="feature-details" name="details" rows="5" required placeholder="Describe your feature idea and why it would be valuable..."></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Submit Feature Idea</button>
+                            </form>
+                        </div>
+                        <div id="general-feedback" class="feedback-option">
+                            <div class="icon">🎮</div>
+                            <h3>Share Your Experience</h3>
+                            <p>Tell me about your overall experience with the beta.</p>
+                            <form id="experience-form" class="feedback-form">
+                                <div class="form-group">
+                                    <label for="experience-rating">Rating</label>
+                                    <div class="rating-container">
+                                        <div class="rating">
+                                            <input type="radio" id="star5" name="rating" value="5" />
+                                            <label for="star5">★</label>
+                                            <input type="radio" id="star4" name="rating" value="4" />
+                                            <label for="star4">★</label>
+                                            <input type="radio" id="star3" name="rating" value="3" />
+                                            <label for="star3">★</label>
+                                            <input type="radio" id="star2" name="rating" value="2" />
+                                            <label for="star2">★</label>
+                                            <input type="radio" id="star1" name="rating" value="1" />
+                                            <label for="star1">★</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="experience-details">Your Thoughts</label>
+                                    <textarea id="experience-details" name="details" rows="5" required placeholder="What did you like? What could be better?"></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Submit Feedback</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="download" class="download hidden">
+            <div class="container">
+                <h2>Download Beta Builds</h2>
+                <p>As a beta tester, you have access to the latest builds. Please keep these files confidential.</p>
+                <div class="downloads">
+                    <div class="download-card">
+                        <h3>8ball for Playdate v0.1.2</h3>
+                        <p class="version-date">Updated: May 1, 2023</p>
+                        <p class="version-notes">Initial beta release with basic functionality</p>
+                        <a href="#" class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="https://owen.uno">owen.uno</a>
+                    <span class="beta-badge">beta</span>
+                </div>
+                <p>Made with ♡ by Owen Van Vooren</p>
+                <div class="footer-links">
+                    <a href="https://owen.uno">Main Site</a>
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="mailto:beta@owen.uno">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+        import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app-check.js";
+        import { sendEmailVerification, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDclD_OzKrJhYkVjwWnd5VY-Q0Im6JDFPU",
+            authDomain: "owen-uno-beta.firebaseapp.com",
+            projectId: "owen-uno-beta",
+            storageBucket: "owen-uno-beta.firebaseapp.com",
+            messagingSenderId: "146588456357",
+            appId: "1:146588456357:web:cf1f25db2b38086155044c",
+            measurementId: "G-M570CEYENP",
+            databaseURL: "https://owen-uno-beta-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        
+        // Initialize App Check
+        const appCheck = initializeAppCheck(app, {
+          provider: new ReCaptchaV3Provider('6Lf35gArAAAAABa2LSIqwTxn2A5m7Jgh0bQ20pfE'),
+          isTokenAutoRefreshEnabled: true
+        });
+
+        // Make Firebase services available to the main script
+        window.firebaseApp = app;
+        window.firebaseDatabase = database;
+        window.firebaseAuth = auth;
+        window.firebaseRefs = {
+            ref: ref,
+            set: set,
+            get: get,
+            child: child,
+            onValue: onValue
+        };
+        window.firebaseAuthFunctions = {
+            signInWithEmailAndPassword: signInWithEmailAndPassword,
+            signOut: signOut,
+            createUserWithEmailAndPassword: createUserWithEmailAndPassword,
+            sendEmailVerification: sendEmailVerification
+        };
+    </script>
+
+    <script src="script.js"></script>
+</body>
+</html> 
