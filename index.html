@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js"></script>
 </head>
 <body>
     <header>
@@ -45,13 +47,101 @@
                                 <label for="login-email">Email</label>
                                 <input type="email" id="login-email" name="email" required>
                             </div>
+                            <div class="g-recaptcha-container">
+                                <div class="g-recaptcha" data-sitekey="6Ldr8AArAAAAACctZPXwyDAfeLvssTedGAUX27_3"></div>
+                            </div>
                             <button type="submit" class="btn-primary">Log In</button>
                         </form>
                         <p class="auth-message">Don't have a code? <a href="#signup-8ball" class="close-auth-redirect">Apply for beta access</a></p>
                     </div>
+                    
+                    <!-- Admin Login Section (hidden by default) -->
+                    <div id="admin-login-section" class="hidden">
+                        <h2>Admin Login</h2>
+                        <p>Access the admin dashboard to manage beta testers.</p>
+                        <form id="admin-login-form">
+                            <div class="form-group">
+                                <label for="admin-email">Email</label>
+                                <input type="email" id="admin-email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="admin-password">Password</label>
+                                <input type="password" id="admin-password" name="password" required>
+                            </div>
+                            <div class="g-recaptcha-container">
+                                <div class="g-recaptcha" data-sitekey="6Ldr8AArAAAAACctZPXwyDAfeLvssTedGAUX27_3"></div>
+                            </div>
+                            <button type="submit" class="btn-primary">Log In</button>
+                        </form>
+                        <p class="auth-message"><a href="#" id="back-to-user-login">Back to user login</a></p>
+                    </div>
+                    
+                    <!-- Email Verification Section (hidden by default) -->
+                    <div id="email-verification-section" class="hidden">
+                        <h2>Verify Your Email</h2>
+                        <p>A verification link has been sent to your email. Please check your inbox and click the link to complete the verification process.</p>
+                        <button id="resend-verification-email" class="btn-secondary">Resend Verification Email</button>
+                        <p class="auth-message"><a href="#" id="back-to-login">Back to login</a></p>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Admin Portal (hidden by default) -->
+        <section id="admin-portal" class="admin-portal hidden">
+            <div class="container">
+                <h2>Admin Portal</h2>
+                <p>Manage beta applications, beta codes, and feedback.</p>
+                
+                <div class="admin-tabs">
+                    <button class="admin-tab active" data-tab="applications">Applications</button>
+                    <button class="admin-tab" data-tab="beta-codes">Beta Codes</button>
+                    <button class="admin-tab" data-tab="feedback">Feedback</button>
+                    <button class="admin-tab" data-tab="notifications">Notifications</button>
+                </div>
+                
+                <div class="admin-tab-content">
+                    <!-- Applications Tab -->
+                    <div id="applications-tab" class="tab-content active">
+                        <div class="admin-filter">
+                            <label for="app-filter">Filter by status:</label>
+                            <select id="app-filter">
+                                <option value="all">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div id="applications-list" class="admin-list"></div>
+                    </div>
+                    
+                    <!-- Beta Codes Tab -->
+                    <div id="beta-codes-tab" class="tab-content">
+                        <button id="generate-code" class="btn-primary">Generate New Code</button>
+                        <div id="beta-codes-list" class="admin-list"></div>
+                    </div>
+                    
+                    <!-- Feedback Tab -->
+                    <div id="feedback-tab" class="tab-content">
+                        <div class="admin-filter">
+                            <label for="feedback-filter">Filter by type:</label>
+                            <select id="feedback-filter">
+                                <option value="all">All Feedback</option>
+                                <option value="bugs">Bug Reports</option>
+                                <option value="features">Feature Requests</option>
+                                <option value="experiences">User Experiences</option>
+                            </select>
+                        </div>
+                        <div id="feedback-list" class="admin-list"></div>
+                    </div>
+                    
+                    <!-- Notifications Tab -->
+                    <div id="notifications-tab" class="tab-content">
+                        <div id="notifications-list" class="admin-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section class="hero">
             <div class="container">
@@ -151,6 +241,9 @@
                     <div class="form-group checkbox">
                         <input type="checkbox" id="terms" name="terms" required>
                         <label for="terms">I agree to provide <b>constructive</b> feedback and report any bugs I find</label>
+                    </div>
+                    <div class="g-recaptcha-container">
+                        <div class="g-recaptcha" data-sitekey="6Ldr8AArAAAAACctZPXwyDAfeLvssTedGAUX27_3"></div>
                     </div>
                     <button type="submit" class="btn-primary">Submit Application</button>
                 </form>
@@ -267,8 +360,8 @@
                 <p>Made with ♡ by Owen Van Vooren</p>
                 <div class="footer-links">
                     <a href="https://owen.uno">Main Site</a>
-                    <a href="#privacy">Privacy Policy</a>
-                    <a href="mailto:beta@owen.uno">Contact</a>
+                    <a href="mailto:hi@owen.uno">Contact</a>
+                    <a href="#" id="admin-link">Admin</a>
                 </div>
             </div>
         </div>
@@ -279,10 +372,17 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
-        import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, child, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,
+            sendEmailVerification,
+            sendPasswordResetEmail,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
         import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app-check.js";
-        import { sendEmailVerification, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -304,27 +404,31 @@
         
         // Initialize App Check
         const appCheck = initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider('6Lf35gArAAAAABa2LSIqwTxn2A5m7Jgh0bQ20pfE'),
-          isTokenAutoRefreshEnabled: true
+            provider: new ReCaptchaV3Provider('6Ldr8AArAAAAACctZPXwyDAfeLvssTedGAUX27_3'),
+            isTokenAutoRefreshEnabled: true
         });
 
         // Make Firebase services available to the main script
         window.firebaseApp = app;
         window.firebaseDatabase = database;
         window.firebaseAuth = auth;
+        window.firebaseAppCheck = appCheck;
         window.firebaseRefs = {
             ref: ref,
             set: set,
             get: get,
             child: child,
-            onValue: onValue
+            onValue: onValue,
+            update: update,
+            remove: remove
         };
         window.firebaseAuthFunctions = {
             signInWithEmailAndPassword: signInWithEmailAndPassword,
-            signOut: signOut,
             createUserWithEmailAndPassword: createUserWithEmailAndPassword,
             sendEmailVerification: sendEmailVerification,
-            sendPasswordResetEmail: sendPasswordResetEmail
+            sendPasswordResetEmail: sendPasswordResetEmail,
+            onAuthStateChanged: onAuthStateChanged,
+            signOut: signOut
         };
     </script>
 
