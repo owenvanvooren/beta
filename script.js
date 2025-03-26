@@ -397,19 +397,22 @@ document.addEventListener('DOMContentLoaded', () => {
             signupMessage.className = 'form-message';
 
             const checkRecaptchaReady = () => { // ✅ Function to check reCaptcha readiness
-                if (typeof grecaptcha !== 'undefined' && grecaptcha.enterprise) {
-                    // reCAPTCHA is ready, execute the code
+                console.log("Checking if window.grecaptcha.enterprise is ready..."); // More specific log
+                console.log("window.grecaptcha:", window.grecaptcha); // Log the grecaptcha object itself
+
+                if (typeof window.grecaptcha !== 'undefined' && window.grecaptcha.enterprise) {
+                    console.log("window.grecaptcha.enterprise is available. Proceeding..."); // Confirmation log
                     executeRecaptcha();
                 } else {
-                    // reCAPTCHA not yet ready, try again after a short delay
-                    setTimeout(checkRecaptchaReady, 300); // Retry after 300ms
+                    console.log("window.grecaptcha.enterprise is NOT ready. Retrying in 1000ms..."); // Indicate retry
+                    setTimeout(checkRecaptchaReady, 1000); // Increased delay to 1000ms
                 }
             };
 
             const executeRecaptcha = async () => { // ✅ Function to execute reCaptcha and form submission
                 try {
                     // **1. Firebase App Check Token**
-                    const appCheckTokenResponse = await grecaptcha.enterprise.execute('YOUR_RECAPTCHA_SITE_KEY', {
+                    const appCheckTokenResponse = await window.grecaptcha.enterprise.execute('YOUR_RECAPTCHA_SITE_KEY', { // Explicitly use window.grecaptcha.enterprise
                         action: 'beta_signup'
                     });
                     const appCheckToken = appCheckTokenResponse;
@@ -653,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const targetHref = this.getAttribute('href');
-            if (targetHref && targetHref !== "#") {
+            if (targetHref && targetHref !== "#" && targetHref !== '') { // ✅ Check for empty or just '#' href
                 const targetId = targetHref;
                 const targetElement = document.querySelector(targetId);
 
