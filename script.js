@@ -304,8 +304,73 @@ document.addEventListener('DOMContentLoaded', () => {
         adminPortal.classList.remove('hidden');
         adminPortal.classList.add('active');
         adminDashboard.classList.remove('hidden');
-        loadBetaApplications(); // Call function to load applications
-        updateAuthUI(true, currentUser.isAdmin); // ✅ Indicate admin login to updateAuthUI
+        
+        // Create tabs for different sections
+        const tabsHtml = `
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="applications">Applications</button>
+                <button class="tab-btn" data-tab="bugs">Bug Reports</button>
+                <button class="tab-btn" data-tab="features">Feature Requests</button>
+                <button class="tab-btn" data-tab="ratings">Ratings</button>
+                <button class="close-admin-btn">&times;</button>
+            </div>
+            <div class="tab-content">
+                <div id="applications-tab" class="tab-pane active">
+                    <div id="applications-list">Loading applications...</div>
+                </div>
+                <div id="bugs-tab" class="tab-pane">
+                    <div id="bugs-list">Loading bug reports...</div>
+                </div>
+                <div id="features-tab" class="tab-pane">
+                    <div id="features-list">Loading feature requests...</div>
+                </div>
+                <div id="ratings-tab" class="tab-pane">
+                    <div id="ratings-list">Loading ratings...</div>
+                </div>
+            </div>
+        `;
+        
+        adminDashboard.innerHTML = tabsHtml;
+        
+        // Add event listeners for tabs
+        const tabButtons = adminDashboard.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.classList.contains('close-admin-btn')) {
+                    hideAdminPortal();
+                    return;
+                }
+                
+                // Update active tab
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = button.dataset.tab;
+                const tabPanes = adminDashboard.querySelectorAll('.tab-pane');
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Load content for the selected tab
+                switch(tabId) {
+                    case 'applications':
+                        loadBetaApplications();
+                        break;
+                    case 'bugs':
+                        loadBugReports();
+                        break;
+                    case 'features':
+                        loadFeatureRequests();
+                        break;
+                    case 'ratings':
+                        loadRatings();
+                        break;
+                }
+            });
+        });
+        
+        // Load initial content
+        loadBetaApplications();
     };
 
     // Function to load beta applications from Firebase
@@ -437,9 +502,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Placeholder functions for Approve and Deny actions (to be implemented later)
-    const handleDenyApplication = (appId) => {
+    const handleDenyApplication = async (appId) => {
         console.log(`Deny application: ${appId}`);
-        alert(`Deny action for application ID: ${appId} - Functionality to be implemented.`);
+        
+        const applicationsRef = ref(database, `applications/${appId}`);
+        const snapshot = await get(applicationsRef);
+        if (!snapshot.exists()) {
+            alert('Application not found.');
+            return;
+        }
+        
+        try {
+            // Update application status to 'denied'
+            const applicationStatusRef = ref(database, `applications/${appId}/status`);
+            await set(applicationStatusRef, 'denied');
+            
+            // Refresh the applications list
+            loadBetaApplications();
+            
+            alert('Application denied successfully.');
+        } catch (error) {
+            console.error("Error denying application:", error);
+            alert('Error denying application. Check console for details.');
+        }
     };
 
     // Sign out user
@@ -454,31 +539,44 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Update the UI based on authentication state (Modified to handle admin UI)
-    const updateAuthUI = (isLoggedIn, isAdmin = false) => { // ✅ Added isAdmin parameter
+    const updateAuthUI = (isLoggedIn, isAdmin = false) => {
         if (isLoggedIn && currentUser) {
             // Update auth status in nav
             authStatus.classList.add('logged-in');
-            if (isAdmin) { // ✅ Admin user UI
-                loginLink.textContent = `Admin`; // Or use your email prefix: `${currentUser.email.split('@')[0]}`
-                loginLink.href = '#admin-portal'; // Link to admin portal
-            } else { // Beta user UI (existing)
+            if (isAdmin) {
+                // Simplified admin header
+                loginLink.textContent = 'Admin';
+                loginLink.href = '#admin-portal';
+                
+                // Remove other nav items for admin
+                const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
+                navItems.forEach(item => item.classList.add('hidden'));
+            } else {
+                // Regular beta user UI
                 loginLink.textContent = `${currentUser.email.split('@')[0]}`;
                 loginLink.href = '#account';
+                
+                // Show all nav items
+                const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
+                navItems.forEach(item => item.classList.remove('hidden'));
             }
 
-            // Show feedback forms and hide login prompt (existing)
+            // Show feedback forms and hide login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.add('hidden');
             if (feedbackForms) feedbackForms.classList.remove('hidden');
 
-            // Show download section if it exists (existing)
+            // Show download section if it exists
             if (downloadSection) downloadSection.classList.remove('hidden');
 
-            // Add dropdown menu (Modified for Admin Portal link)
+            // Add dropdown menu
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown-menu';
             dropdown.innerHTML = `
                 <ul>
-                    ${isAdmin ? `<li><a href="#admin-portal" id="admin-portal-link-dropdown">Admin Portal</a></li>` : ''}
+                    ${isAdmin ? `
+                        <li><a href="#admin-portal" id="admin-portal-link-dropdown">Admin Portal</a></li>
+                        <li><a href="#" id="view-site-link">View Site</a></li>
+                    ` : ''}
                     <li><button id="sign-out-btn" class="btn-outline">Sign Out</button></li>
                 </ul>
             `;
@@ -487,19 +585,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!authStatus.querySelector('.dropdown-menu')) {
                 authStatus.appendChild(dropdown);
                 document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-                if (isAdmin) { // ✅ Event listener for Admin Portal dropdown link
+                if (isAdmin) {
                     document.getElementById('admin-portal-link-dropdown').addEventListener('click', (e) => {
                         e.preventDefault();
-                        adminPortal.classList.add('active'); // Show admin portal when clicked in dropdown
-                        adminPortal.classList.remove('initially-hidden'); // Ensure it's not hidden by initial class
+                        showAdminDashboard();
+                    });
+                    document.getElementById('view-site-link').addEventListener('click', (e) => {
+                        e.preventDefault();
+                        hideAdminPortal();
                     });
                 }
             }
         } else {
-            // Update auth status in nav
+            // Reset UI for logged out state
             authStatus.classList.remove('logged-in');
             loginLink.textContent = 'Log In';
             loginLink.href = '#login';
+            
+            // Show all nav items
+            const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
+            navItems.forEach(item => item.classList.remove('hidden'));
             
             // Hide feedback forms and show login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.remove('hidden');
@@ -514,6 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // Add function to hide admin portal
+    const hideAdminPortal = () => {
+        adminPortal.classList.remove('active');
+        adminPortal.classList.add('initially-hidden');
+    };
+
     // Initialize feedback forms
     const initFeedbackForms = () => {
         // Make feedback options expandable
@@ -964,6 +1075,97 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+    };
+    
+    // Add functions to load different types of feedback
+    const loadBugReports = () => {
+        const bugsList = document.getElementById('bugs-list');
+        bugsList.innerHTML = '<p>Loading bug reports...</p>';
+        
+        const bugsRef = ref(database, 'feedback/bugs');
+        onValue(bugsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                bugsList.innerHTML = '';
+                const bugs = snapshot.val();
+                
+                Object.entries(bugs).forEach(([id, bug]) => {
+                    const bugCard = document.createElement('div');
+                    bugCard.className = 'feedback-card';
+                    bugCard.innerHTML = `
+                        <h4>${bug.title}</h4>
+                        <p class="severity ${bug.severity}">Severity: ${bug.severity}</p>
+                        <p>${bug.details}</p>
+                        <p class="meta">Submitted by: ${bug.submittedBy} on ${new Date(bug.timestamp).toLocaleDateString()}</p>
+                        <div class="feedback-actions">
+                            <button class="btn-secondary mark-resolved-btn" data-id="${id}">Mark Resolved</button>
+                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
+                        </div>
+                    `;
+                    bugsList.appendChild(bugCard);
+                });
+            } else {
+                bugsList.innerHTML = '<p>No bug reports yet.</p>';
+            }
+        });
+    };
+
+    const loadFeatureRequests = () => {
+        const featuresList = document.getElementById('features-list');
+        featuresList.innerHTML = '<p>Loading feature requests...</p>';
+        
+        const featuresRef = ref(database, 'feedback/features');
+        onValue(featuresRef, (snapshot) => {
+            if (snapshot.exists()) {
+                featuresList.innerHTML = '';
+                const features = snapshot.val();
+                
+                Object.entries(features).forEach(([id, feature]) => {
+                    const featureCard = document.createElement('div');
+                    featureCard.className = 'feedback-card';
+                    featureCard.innerHTML = `
+                        <h4>${feature.title}</h4>
+                        <p>${feature.details}</p>
+                        <p class="meta">Submitted by: ${feature.submittedBy} on ${new Date(feature.timestamp).toLocaleDateString()}</p>
+                        <div class="feedback-actions">
+                            <button class="btn-secondary mark-implemented-btn" data-id="${id}">Mark Implemented</button>
+                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
+                        </div>
+                    `;
+                    featuresList.appendChild(featureCard);
+                });
+            } else {
+                featuresList.innerHTML = '<p>No feature requests yet.</p>';
+            }
+        });
+    };
+
+    const loadRatings = () => {
+        const ratingsList = document.getElementById('ratings-list');
+        ratingsList.innerHTML = '<p>Loading ratings...</p>';
+        
+        const ratingsRef = ref(database, 'feedback/experiences');
+        onValue(ratingsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                ratingsList.innerHTML = '';
+                const ratings = snapshot.val();
+                
+                Object.entries(ratings).forEach(([id, rating]) => {
+                    const ratingCard = document.createElement('div');
+                    ratingCard.className = 'feedback-card';
+                    ratingCard.innerHTML = `
+                        <div class="rating-stars">${'★'.repeat(rating.rating)}${'☆'.repeat(5-rating.rating)}</div>
+                        <p>${rating.details}</p>
+                        <p class="meta">Submitted by: ${rating.submittedBy} on ${new Date(rating.timestamp).toLocaleDateString()}</p>
+                        <div class="feedback-actions">
+                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
+                        </div>
+                    `;
+                    ratingsList.appendChild(ratingCard);
+                });
+            } else {
+                ratingsList.innerHTML = '<p>No ratings yet.</p>';
+            }
+        });
     };
     
     // Initialize everything
