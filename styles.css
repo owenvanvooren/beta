@@ -843,6 +843,10 @@ footer {
     display: none !important;
 }
 
+.initially-hidden {
+    display: none;
+}
+
 /* User Status Display */
 .user-logged-in {
     background-color: var(--accent-color);
@@ -881,4 +885,74 @@ footer {
 .form-message.error {
     color: var(--secondary-color);
     font-weight: 600;
+}
+
+/* Admin Portal Styles */
+.admin-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1100; /* Higher than auth-overlay */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.admin-portal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.admin-container {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 700px; /* Wider for admin portal */
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+    overflow-y: auto; /* In case content is long */
+    max-height: 95vh;
+}
+
+.admin-portal.active .admin-container {
+    transform: translateY(0);
+}
+
+#admin-dashboard h3 {
+    margin-bottom: 1rem;
+}
+
+#applications-list {
+    margin-bottom: 1.5rem;
+}
+
+.application-card {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.8rem;
+}
+
+.application-card h4 {
+    margin-bottom: 0.5rem;
+}
+
+.application-actions button {
+    margin-right: 0.5rem;
+}
+
+/* Login Mode Separator (Optional - for visual separation) */
+.login-mode-separator {
+    margin: 0 0.5em; /* Adjust spacing as needed */
+    color: var(--light-text); /* Or a color that fits your design */
 } 

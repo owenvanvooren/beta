@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.google.com/recaptcha/api.js?render=YOUR_RECAPTCHA_SITE_KEY"></script>
 </head>
 <body>
     <header>
@@ -38,17 +37,26 @@
                         <h2>Log In to Beta Access</h2>
                         <p>Enter your beta code to access test builds and submit feedback.</p>
                         <form id="login-form">
-                            <div class="form-group">
+                            <div class="form-group" id="beta-code-group">
                                 <label for="beta-code">Beta Code</label>
                                 <input type="text" id="beta-code" name="betaCode" required placeholder="Enter your unique beta code">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" id="login-email-group">
                                 <label for="login-email">Email</label>
                                 <input type="email" id="login-email" name="email" required>
+                            </div>
+                            <div class="form-group hidden" id="login-password-group">
+                                <label for="login-password">Password</label>
+                                <input type="password" id="login-password" name="password" placeholder="Admin Password">
                             </div>
                             <button type="submit" class="btn-primary">Log In</button>
                         </form>
                         <p class="auth-message">Don't have a code? <a href="#signup-8ball" class="close-auth-redirect">Apply for beta access</a></p>
+                        <p class="auth-message" id="admin-login-switcher">
+                            <a href="#" id="admin-login-link">Admin Login</a>
+                            <span class="login-mode-separator" aria-hidden="true"> | </span>
+                            <a href="#" id="beta-login-link" class="hidden">Beta Tester Login</a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -154,7 +162,7 @@
                         <label for="terms">I agree to provide <b>constructive</b> feedback and report any bugs I find</label>
                     </div>
                     <button type="submit" class="btn-primary">Submit Application</button>
-                    <p id="signup-message" class="form-message"></p> <div id="recaptcha-container"></div>
+                    <p id="signup-message" class="form-message"></p>
                 </form>
             </div>
         </section>
@@ -246,18 +254,46 @@
         <section id="download" class="download hidden">
             <div class="container">
                 <h2>Download Beta Builds</h2>
-                <p>As a beta tester, you have access to the latest builds. Please keep these files confidential.</p>
+                <p>As a beta tester, you have access to the latest builds. By downloading the game, you agree to keep it completely confidential effective immediately and indefinitely.</p>
                 <div class="downloads">
                     <div class="download-card">
-                        <h3>8ball for Playdate v0.1.2</h3>
-                        <p class="version-date">Updated: May 1, 2023</p>
+                        <h3>8ball for Playdate b0.0 (beta)</h3>
+                        <p class="version-date">Updated: March 26, 2025</p>
                         <p class="version-notes">Initial beta release with basic functionality</p>
-                        <a href="#" class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
+                        <a href="8ball.pdx" download class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
                     </div>
                 </div>
             </div>
         </section>
     </main>
+
+    <div id="admin-portal" class="admin-portal hidden initially-hidden">
+        <div class="admin-container">
+            <h2>Admin Portal</h2>
+            <div id="admin-auth-section">
+                <h3>Admin Login</h3>
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label for="admin-email">Email</label>
+                        <input type="email" id="admin-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Password</label>
+                        <input type="password" id="admin-password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Admin Log In</button>
+                    <p id="admin-login-message" class="form-message"></p>
+                </form>
+            </div>
+            <div id="admin-dashboard" class="hidden">
+                <h3>Beta Applications</h3>
+                <div id="applications-list">
+                    <p>Loading applications...</p>
+                </div>
+                <button id="admin-sign-out-btn" class="btn-outline">Sign Out</button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -269,7 +305,6 @@
                 <p>Made with ♡ by Owen Van Vooren</p>
                 <div class="footer-links">
                     <a href="https://owen.uno">Main Site</a>
-                    <a href="#">Admin</a>
                     <a href="mailto:hi@owen.uno">Contact</a>
                 </div>
             </div>
@@ -278,13 +313,11 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
         import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDclD_OzKrJhYkVjwWnd5VY-Q0Im6JDFPU",
             authDomain: "owen-uno-beta.firebaseapp.com",
@@ -296,14 +329,13 @@
             databaseURL: "https://owen-uno-beta-default-rtdb.firebaseio.com/"
         };
 
-        // Initialize Firebase
+
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
         const auth = getAuth(app);
-
-        // Make Firebase services available to the main script
         window.firebaseApp = app;
+
         window.firebaseDatabase = database;
         window.firebaseAuth = auth;
         window.firebaseRefs = {
@@ -315,7 +347,9 @@
         };
         window.firebaseAuthFunctions = {
             signInWithEmailAndPassword: signInWithEmailAndPassword,
-            signOut: signOut
+            signOut: signOut,
+            createUserWithEmailAndPassword: createUserWithEmailAndPassword,
+            sendEmailVerification: sendEmailVerification
         };
     </script>
 

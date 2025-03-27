@@ -1,0 +1,10 @@
+name=8ball
+author=Owen Van Vooren
+description=Predict your future with a not-so-magic 8 ball. Test your fate with the flip of a coin.
+bundleID=uno.owen.8ball
+version=1.0
+buildNumber=100
+imagePath=images
+launchSoundPath=/sounds/8ball-startup.wav
+pdxversion=20601
+buildtime=796267817
