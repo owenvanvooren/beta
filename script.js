@@ -47,6 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements (Get beta login link element)
     const betaLoginLink = document.getElementById('beta-login-link'); // ✅ Get the beta login link element
 
+    // DOM Elements (Admin Portal - Add new lists)
+    const bugReportsList = document.getElementById('bug-reports-list');
+    const featureRequestsList = document.getElementById('feature-requests-list');
+    const userRatingsList = document.getElementById('user-ratings-list');
+    const viewWebsiteBtn = document.getElementById('view-website-btn'); // ✅ Get the "View Website" button
+
     // Check for existing session
     const checkExistingSession = () => {
         const savedSession = localStorage.getItem('betaUserSession');
@@ -298,79 +304,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAuthUI(true, currentUser.isAdmin);
     };
 
-    // Function to show admin dashboard (Enhanced to load applications and update UI)
+    // Function to show admin dashboard (Enhanced to load applications and feedback data)
     const showAdminDashboard = () => {
         adminPortal.classList.remove('initially-hidden');
         adminPortal.classList.remove('hidden');
         adminPortal.classList.add('active');
         adminDashboard.classList.remove('hidden');
-        
-        // Create tabs for different sections
-        const tabsHtml = `
-            <div class="admin-tabs">
-                <button class="tab-btn active" data-tab="applications">Applications</button>
-                <button class="tab-btn" data-tab="bugs">Bug Reports</button>
-                <button class="tab-btn" data-tab="features">Feature Requests</button>
-                <button class="tab-btn" data-tab="ratings">Ratings</button>
-                <button class="close-admin-btn">&times;</button>
-            </div>
-            <div class="tab-content">
-                <div id="applications-tab" class="tab-pane active">
-                    <div id="applications-list">Loading applications...</div>
-                </div>
-                <div id="bugs-tab" class="tab-pane">
-                    <div id="bugs-list">Loading bug reports...</div>
-                </div>
-                <div id="features-tab" class="tab-pane">
-                    <div id="features-list">Loading feature requests...</div>
-                </div>
-                <div id="ratings-tab" class="tab-pane">
-                    <div id="ratings-list">Loading ratings...</div>
-                </div>
-            </div>
-        `;
-        
-        adminDashboard.innerHTML = tabsHtml;
-        
-        // Add event listeners for tabs
-        const tabButtons = adminDashboard.querySelectorAll('.tab-btn');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                if (button.classList.contains('close-admin-btn')) {
-                    hideAdminPortal();
-                    return;
-                }
-                
-                // Update active tab
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Show corresponding content
-                const tabId = button.dataset.tab;
-                const tabPanes = adminDashboard.querySelectorAll('.tab-pane');
-                tabPanes.forEach(pane => pane.classList.remove('active'));
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-                
-                // Load content for the selected tab
-                switch(tabId) {
-                    case 'applications':
-                        loadBetaApplications();
-                        break;
-                    case 'bugs':
-                        loadBugReports();
-                        break;
-                    case 'features':
-                        loadFeatureRequests();
-                        break;
-                    case 'ratings':
-                        loadRatings();
-                        break;
-                }
-            });
-        });
-        
-        // Load initial content
-        loadBetaApplications();
+        loadBetaApplications(); // Call function to load applications
+        loadBugReports();        // Load bug reports
+        loadFeatureRequests();   // Load feature requests
+        loadUserRatings();       // Load user ratings
+        updateAuthUI(true, currentUser.isAdmin); // ✅ Indicate admin login to updateAuthUI
     };
 
     // Function to load beta applications from Firebase
@@ -501,29 +445,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Placeholder functions for Approve and Deny actions (to be implemented later)
+    // Function to handle application denial
     const handleDenyApplication = async (appId) => {
         console.log(`Deny application: ${appId}`);
-        
+        // alert(`Deny action for application ID: ${appId} - Functionality to be implemented.`); // Removed placeholder alert
+
         const applicationsRef = ref(database, `applications/${appId}`);
         const snapshot = await get(applicationsRef);
         if (!snapshot.exists()) {
             alert('Application not found.');
             return;
         }
-        
+        // No need to get email or UID for denial
+
+        adminLoginMessage.textContent = 'Denying application...'; // Use admin message for feedback
+        adminLoginMessage.className = 'form-message';
+
         try {
-            // Update application status to 'denied'
+            // 1. Update application status to 'denied'
             const applicationStatusRef = ref(database, `applications/${appId}/status`);
             await set(applicationStatusRef, 'denied');
-            
-            // Refresh the applications list
-            loadBetaApplications();
-            
-            alert('Application denied successfully.');
+
+            adminLoginMessage.textContent = 'Application denied successfully!';
+            adminLoginMessage.className = 'form-message success';
+
+            // ✅ Remove the application card from the list in the UI
+            const applicationCardToRemove = document.querySelector(`.application-card .deny-btn[data-app-id="${appId}"]`).closest('.application-card');
+            if (applicationCardToRemove) {
+                applicationCardToRemove.remove();
+            }
+
+            alert('Application denied!'); // User feedback alert
+
         } catch (error) {
             console.error("Error denying application:", error);
-            alert('Error denying application. Check console for details.');
+            adminLoginMessage.textContent = 'Error denying application. See console for details.';
+            adminLoginMessage.className = 'form-message error';
+            alert('Error denying application. Check console. Error: ' + error.message);
         }
     };
 
@@ -539,44 +497,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Update the UI based on authentication state (Modified to handle admin UI)
-    const updateAuthUI = (isLoggedIn, isAdmin = false) => {
+    const updateAuthUI = (isLoggedIn, isAdmin = false) => { // ✅ Added isAdmin parameter
         if (isLoggedIn && currentUser) {
             // Update auth status in nav
             authStatus.classList.add('logged-in');
-            if (isAdmin) {
-                // Simplified admin header
-                loginLink.textContent = 'Admin';
-                loginLink.href = '#admin-portal';
-                
-                // Remove other nav items for admin
-                const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
-                navItems.forEach(item => item.classList.add('hidden'));
-            } else {
-                // Regular beta user UI
+            if (isAdmin) { // ✅ Admin user UI
+                loginLink.textContent = `Admin`; // Or use your email prefix: `${currentUser.email.split('@')[0]}`
+                loginLink.href = '#admin-portal'; // Link to admin portal
+                authStatus.classList.add('admin-mode-header'); // Add class for admin header styling
+            } else { // Beta user UI (existing)
                 loginLink.textContent = `${currentUser.email.split('@')[0]}`;
                 loginLink.href = '#account';
-                
-                // Show all nav items
-                const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
-                navItems.forEach(item => item.classList.remove('hidden'));
+                authStatus.classList.remove('admin-mode-header'); // Ensure class is removed in beta user mode
             }
 
-            // Show feedback forms and hide login prompt
+            // Show feedback forms and hide login prompt (existing)
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.add('hidden');
             if (feedbackForms) feedbackForms.classList.remove('hidden');
 
-            // Show download section if it exists
+            // Show download section if it exists (existing)
             if (downloadSection) downloadSection.classList.remove('hidden');
 
-            // Add dropdown menu
+            // Add dropdown menu (Modified for Admin Portal link)
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown-menu';
             dropdown.innerHTML = `
                 <ul>
-                    ${isAdmin ? `
-                        <li><a href="#admin-portal" id="admin-portal-link-dropdown">Admin Portal</a></li>
-                        <li><a href="#" id="view-site-link">View Site</a></li>
-                    ` : ''}
+                    ${isAdmin ? `<li><a href="#admin-portal" id="admin-portal-link-dropdown">Admin Portal</a></li>` : ''}
                     <li><button id="sign-out-btn" class="btn-outline">Sign Out</button></li>
                 </ul>
             `;
@@ -585,26 +532,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!authStatus.querySelector('.dropdown-menu')) {
                 authStatus.appendChild(dropdown);
                 document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-                if (isAdmin) {
+                if (isAdmin) { // ✅ Event listener for Admin Portal dropdown link
                     document.getElementById('admin-portal-link-dropdown').addEventListener('click', (e) => {
                         e.preventDefault();
-                        showAdminDashboard();
-                    });
-                    document.getElementById('view-site-link').addEventListener('click', (e) => {
-                        e.preventDefault();
-                        hideAdminPortal();
+                        adminPortal.classList.add('active'); // Show admin portal when clicked in dropdown
+                        adminPortal.classList.remove('initially-hidden'); // Ensure it's not hidden by initial class
                     });
                 }
             }
         } else {
-            // Reset UI for logged out state
+            // Update auth status in nav
             authStatus.classList.remove('logged-in');
             loginLink.textContent = 'Log In';
             loginLink.href = '#login';
-            
-            // Show all nav items
-            const navItems = document.querySelectorAll('nav ul li:not(#auth-status)');
-            navItems.forEach(item => item.classList.remove('hidden'));
+            authStatus.classList.remove('admin-mode-header'); // Ensure class is removed when logged out
             
             // Hide feedback forms and show login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.remove('hidden');
@@ -619,12 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // Add function to hide admin portal
-    const hideAdminPortal = () => {
-        adminPortal.classList.remove('active');
-        adminPortal.classList.add('initially-hidden');
-    };
-
     // Initialize feedback forms
     const initFeedbackForms = () => {
         // Make feedback options expandable
@@ -1075,97 +1010,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // "View Website" Button Event Listener
+        if (viewWebsiteBtn) {
+            viewWebsiteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                adminPortal.classList.remove('active'); // Hide Admin Portal
+                adminPortal.classList.add('hidden');
+                // Optionally scroll back to top or a relevant section
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Example: Scroll to top
+            });
+        }
     };
     
-    // Add functions to load different types of feedback
+    // Function to load bug reports from Firebase
     const loadBugReports = () => {
-        const bugsList = document.getElementById('bugs-list');
-        bugsList.innerHTML = '<p>Loading bug reports...</p>';
-        
-        const bugsRef = ref(database, 'feedback/bugs');
-        onValue(bugsRef, (snapshot) => {
+        bugReportsList.innerHTML = '<p>Loading bug reports...</p>';
+        const bugReportsRef = ref(database, 'feedback/bugs');
+        onValue(bugReportsRef, (snapshot) => {
             if (snapshot.exists()) {
-                bugsList.innerHTML = '';
-                const bugs = snapshot.val();
-                
-                Object.entries(bugs).forEach(([id, bug]) => {
-                    const bugCard = document.createElement('div');
-                    bugCard.className = 'feedback-card';
-                    bugCard.innerHTML = `
-                        <h4>${bug.title}</h4>
-                        <p class="severity ${bug.severity}">Severity: ${bug.severity}</p>
-                        <p>${bug.details}</p>
-                        <p class="meta">Submitted by: ${bug.submittedBy} on ${new Date(bug.timestamp).toLocaleDateString()}</p>
-                        <div class="feedback-actions">
-                            <button class="btn-secondary mark-resolved-btn" data-id="${id}">Mark Resolved</button>
-                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
-                        </div>
-                    `;
-                    bugsList.appendChild(bugCard);
+                bugReportsList.innerHTML = '';
+                const reportsData = snapshot.val();
+                Object.keys(reportsData).forEach(reportId => {
+                    const report = reportsData[reportId];
+                    const reportCard = createFeedbackCard(report, 'bug'); // Re-use or create a card function
+                    bugReportsList.appendChild(reportCard);
                 });
             } else {
-                bugsList.innerHTML = '<p>No bug reports yet.</p>';
+                bugReportsList.innerHTML = '<p>No bug reports yet.</p>';
             }
+        }, (error) => {
+            console.error("Error fetching bug reports:", error);
+            bugReportsList.innerHTML = '<p class="error">Error loading bug reports.</p>';
         });
     };
 
+    // Function to load feature requests from Firebase
     const loadFeatureRequests = () => {
-        const featuresList = document.getElementById('features-list');
-        featuresList.innerHTML = '<p>Loading feature requests...</p>';
-        
-        const featuresRef = ref(database, 'feedback/features');
-        onValue(featuresRef, (snapshot) => {
+        featureRequestsList.innerHTML = '<p>Loading feature requests...</p>';
+        const featureRequestsRef = ref(database, 'feedback/features');
+        onValue(featureRequestsRef, (snapshot) => {
             if (snapshot.exists()) {
-                featuresList.innerHTML = '';
-                const features = snapshot.val();
-                
-                Object.entries(features).forEach(([id, feature]) => {
-                    const featureCard = document.createElement('div');
-                    featureCard.className = 'feedback-card';
-                    featureCard.innerHTML = `
-                        <h4>${feature.title}</h4>
-                        <p>${feature.details}</p>
-                        <p class="meta">Submitted by: ${feature.submittedBy} on ${new Date(feature.timestamp).toLocaleDateString()}</p>
-                        <div class="feedback-actions">
-                            <button class="btn-secondary mark-implemented-btn" data-id="${id}">Mark Implemented</button>
-                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
-                        </div>
-                    `;
-                    featuresList.appendChild(featureCard);
+                featureRequestsList.innerHTML = '';
+                const requestsData = snapshot.val();
+                Object.keys(requestsData).forEach(requestId => {
+                    const request = requestsData[requestId];
+                    const requestCard = createFeedbackCard(request, 'feature'); // Re-use or create a card function
+                    featureRequestsList.appendChild(requestCard);
                 });
             } else {
-                featuresList.innerHTML = '<p>No feature requests yet.</p>';
+                featureRequestsList.innerHTML = '<p>No feature requests yet.</p>';
             }
+        }, (error) => {
+            console.error("Error fetching feature requests:", error);
+            featureRequestsList.innerHTML = '<p class="error">Error loading feature requests.</p>';
         });
     };
 
-    const loadRatings = () => {
-        const ratingsList = document.getElementById('ratings-list');
-        ratingsList.innerHTML = '<p>Loading ratings...</p>';
-        
-        const ratingsRef = ref(database, 'feedback/experiences');
-        onValue(ratingsRef, (snapshot) => {
+    // Function to load user ratings from Firebase
+    const loadUserRatings = () => {
+        userRatingsList.innerHTML = '<p>Loading user ratings...</p>';
+        const userRatingsRef = ref(database, 'feedback/experiences');
+        onValue(userRatingsRef, (snapshot) => {
             if (snapshot.exists()) {
-                ratingsList.innerHTML = '';
-                const ratings = snapshot.val();
-                
-                Object.entries(ratings).forEach(([id, rating]) => {
-                    const ratingCard = document.createElement('div');
-                    ratingCard.className = 'feedback-card';
-                    ratingCard.innerHTML = `
-                        <div class="rating-stars">${'★'.repeat(rating.rating)}${'☆'.repeat(5-rating.rating)}</div>
-                        <p>${rating.details}</p>
-                        <p class="meta">Submitted by: ${rating.submittedBy} on ${new Date(rating.timestamp).toLocaleDateString()}</p>
-                        <div class="feedback-actions">
-                            <button class="btn-outline delete-btn" data-id="${id}">Delete</button>
-                        </div>
-                    `;
-                    ratingsList.appendChild(ratingCard);
+                userRatingsList.innerHTML = '';
+                const ratingsData = snapshot.val();
+                Object.keys(ratingsData).forEach(ratingId => {
+                    const rating = ratingsData[ratingId];
+                    const ratingCard = createFeedbackCard(rating, 'rating'); // Re-use or create a card function
+                    userRatingsList.appendChild(ratingCard);
                 });
             } else {
-                ratingsList.innerHTML = '<p>No ratings yet.</p>';
+                userRatingsList.innerHTML = '<p>No user ratings yet.</p>';
             }
+        }, (error) => {
+            console.error("Error fetching user ratings:", error);
+            userRatingsList.innerHTML = '<p class="error">Error loading user ratings.</p>';
         });
+    };
+
+    // Helper function to create a feedback card (reusable for bugs, features, ratings)
+    const createFeedbackCard = (feedback, type) => {
+        const card = document.createElement('div');
+        card.className = 'feedback-card'; // You might want to style this in CSS
+        let cardContent = `
+            <h4>${feedback.title || (type === 'rating' ? 'User Rating' : 'No Title')}</h4>
+            <p>Submitted by: ${feedback.submittedBy}</p>
+            <p>Timestamp: ${new Date(feedback.timestamp).toLocaleString()}</p>
+            <p>Details: ${feedback.details}</p>
+        `;
+        if (type === 'bug') {
+            cardContent += `<p>Severity: ${feedback.severity}</p><p>Status: ${feedback.status}</p>`;
+        } else if (type === 'rating') {
+            cardContent += `<p>Rating: ${feedback.rating} stars</p>`;
+        }
+        card.innerHTML = cardContent;
+        return card;
     };
     
     // Initialize everything

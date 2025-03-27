@@ -957,99 +957,12 @@ footer {
     color: var(--light-text); /* Or a color that fits your design */
 }
 
-/* Admin Portal Styles */
-.admin-tabs {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #eee;
+/* Admin Mode Header Styling */
+#auth-status.admin-mode-header + nav ul {
+    display: none; /* Hide regular nav links in admin mode */
 }
 
-.tab-btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--light-text);
-    transition: var(--transition);
-}
-
-.tab-btn.active {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color);
-}
-
-.close-admin-btn {
-    margin-left: auto;
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    line-height: 1;
-}
-
-.tab-pane {
-    display: none;
-}
-
-.tab-pane.active {
-    display: block;
-}
-
-.feedback-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1rem;
-    box-shadow: var(--box-shadow);
-}
-
-.feedback-card h4 {
-    margin-bottom: 0.5rem;
-}
-
-.feedback-card .severity {
-    display: inline-block;
-    padding: 0.2rem 0.5rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.feedback-card .severity.high {
-    background-color: #ffe3e3;
-    color: #dc3545;
-}
-
-.feedback-card .severity.medium {
-    background-color: #fff3cd;
-    color: #856404;
-}
-
-.feedback-card .severity.low {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.feedback-card .meta {
-    font-size: 0.9rem;
-    color: var(--light-text);
-    margin: 1rem 0;
-}
-
-.feedback-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.rating-stars {
-    color: var(--accent-color);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-/* Hide nav items in admin mode */
-nav ul li.hidden {
-    display: none;
+/* Adjust logo alignment in admin mode if needed */
+#auth-status.admin-mode-header + nav {
+    margin-left: auto; /* Example: push nav to the right if only dropdown is visible */
 } 
