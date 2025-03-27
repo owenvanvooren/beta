@@ -260,7 +260,15 @@
                         <h3>8ball for Playdate b0.0 (beta)</h3>
                         <p class="version-date">Updated: March 26, 2025</p>
                         <p class="version-notes">Initial beta release with basic functionality</p>
-                        <a href="8ball.pdx" download class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
+                        <a href="8ball.pdx.zip" download class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
+                        <div id="spacer"></div>
+                        <h2 id="step-title">Steps to install:</h1>
+                            <ol id="step-list">
+                                <li>Download the "8ball.pdx.zip" file</li>
+                                <li>Unzip the downloaded file</li>
+                                <li>Install the unzipped "8ball.pdx" file on your Playdate (learn how at <a href="https://help.play.date/games/sideloading/">help.play.date/games/sideloading/</a>)</li>
+                                <li>Play 8ball, and report bugs, request features, and share your experience to earn <b>brownie points</b>.</li>
+                            </ul>
                     </div>
                 </div>
             </div>
@@ -286,28 +294,45 @@
                 </form>
             </div>
             <div id="admin-dashboard" class="hidden">
-                <h3>Beta Applications</h3>
-                <div id="applications-list">
-                    <p>Loading applications...</p>
+                <div class="admin-section">
+                    <h3>Beta Applications</h3>
+                    <div id="applications-list">
+                        <p>Loading applications...</p>
+                    </div>
                 </div>
 
-                <h3>Bug Reports</h3>
-                <div id="bug-reports-list" class="feedback-data-list">
-                    <p>Loading bug reports...</p>
+                <div class="admin-section">
+                    <h3>Bug Reports</h3>
+                    <div id="bug-reports-list" class="feedback-data-list">
+                        <p>Loading bug reports...</p>
+                    </div>
                 </div>
 
-                <h3>Feature Requests</h3>
-                <div id="feature-requests-list" class="feedback-data-list">
-                    <p>Loading feature requests...</p>
+                <div class="admin-section">
+                    <h3>Feature Requests</h3>
+                    <div id="feature-requests-list" class="feedback-data-list">
+                        <p>Loading feature requests...</p>
+                    </div>
                 </div>
 
-                <h3>User Ratings</h3>
-                <div id="user-ratings-list" class="feedback-data-list">
-                    <p>Loading user ratings...</p>
+                <div class="admin-section">
+                    <h3>User Ratings</h3>
+                    <div id="user-ratings-list" class="feedback-data-list">
+                        <p>Loading user ratings...</p>
+                    </div>
                 </div>
 
-                <button id="admin-sign-out-btn" class="btn-outline">Sign Out</button>
-                <button id="view-website-btn" class="btn-secondary">View Website</button>
+                <div class="admin-section resignations">
+                    <h3>Resignation Requests</h3>
+                    <div id="resignations-list">
+                        <p>Loading resignation requests...</p>
+                    </div>
+                </div>
+
+                <div class="admin-dashboard-actions">
+                    <button id="view-website-btn" class="btn-secondary">View Website</button>
+                    <button id="admin-sign-out-btn" class="btn-outline">Sign Out</button>
+                </div>
             </div>
         </div>
     </div>

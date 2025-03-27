@@ -152,12 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminLoginMessage.className = 'form-message success';
                         authOverlay.classList.remove('active');
                         signInUser(email, null); // Call signInUser for admin login, betaCode is null
-                        alert('Admin login successful!');
+                        showCustomAlert('Admin login successful!', 'success');
                     } catch (error) {
                         console.error("Admin login error:", error);
                         adminLoginMessage.textContent = 'Invalid admin credentials. Please try again.';
                         adminLoginMessage.className = 'form-message error';
-                        alert('Admin login failed. Check credentials and console. Error: ' + error.message);
+                        showCustomAlert('Admin login failed. Check credentials and console. Error: ' + error.message, 'error');
                     }
                 } else {
                     // **Beta Code Login Flow (Existing Logic)**
@@ -310,11 +310,22 @@ document.addEventListener('DOMContentLoaded', () => {
         adminPortal.classList.remove('hidden');
         adminPortal.classList.add('active');
         adminDashboard.classList.remove('hidden');
-        loadBetaApplications(); // Call function to load applications
-        loadBugReports();        // Load bug reports
-        loadFeatureRequests();   // Load feature requests
-        loadUserRatings();       // Load user ratings
-        updateAuthUI(true, currentUser.isAdmin); // ✅ Indicate admin login to updateAuthUI
+        loadBetaApplications();
+        loadBugReports();
+        loadFeatureRequests();
+        loadUserRatings();
+        loadResignations();
+        createCloseButton();
+        updateAuthUI(true, currentUser.isAdmin);
+
+        // Add this CSS to hide the admin dashboard actions section
+        const adminStyle = document.createElement('style');
+        adminStyle.textContent = `
+            .admin-dashboard-actions {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(adminStyle);
     };
 
     // Function to load beta applications from Firebase
@@ -371,181 +382,196 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to handle application approval
     const handleApproveApplication = async (appId) => {
-        console.log(`Approve application: ${appId}`);
-        // alert(`Approve action for application ID: ${appId} - Functionality to be implemented.`); // Removed placeholder alert
+        // First, verify the current user is authenticated and is an admin
+        const currentAuthUser = auth.currentUser;
+        if (!currentAuthUser) {
+            showCustomAlert('You must be logged in as an admin to approve applications. Please sign in again.', 'error');
+            return;
+        }
+
+        // Check if user is admin by checking admins node
+        const adminsRef = ref(database, `admins/${currentAuthUser.uid}`);
+        const adminSnapshot = await get(adminsRef);
+        
+        if (!adminSnapshot.exists()) {
+            showCustomAlert('You do not have admin permissions to approve applications.', 'error');
+            return;
+        }
 
         const applicationsRef = ref(database, `applications/${appId}`);
         const snapshot = await get(applicationsRef);
         if (!snapshot.exists()) {
-            alert('Application not found.');
+            showCustomAlert('Application not found.', 'error');
             return;
         }
+        
         const appData = snapshot.val();
-        const userEmail = appData.email; // Get user's email from application data
+        const userEmail = appData.email;
 
-        adminLoginMessage.textContent = 'Approving application...'; // Use admin message for feedback
+        adminLoginMessage.textContent = 'Approving application...';
         adminLoginMessage.className = 'form-message';
 
         try {
-            // 1. Sign in user temporarily to get UID
-            const userCredential = await signInWithEmailAndPassword(auth, userEmail, generateRandomPassword()); // Use temp password
-            const user = userCredential.user;
-            const uid = user.uid; // Get Firebase UID
-
-            // 2. Find the beta code associated with this email (assuming 1 code per email for now)
+            // Generate a beta code for this user
+            const newBetaCode = generateBetaCode();
+            
+            // First create the beta code - this should work with current rules
             const betaCodesRef = ref(database, 'betaCodes');
-            const betaCodesSnapshot = await get(betaCodesRef);
-            let associatedBetaCodeKey = null;
-            if (betaCodesSnapshot.exists()) {
-                const betaCodes = betaCodesSnapshot.val();
-                for (const key in betaCodes) {
-                    if (betaCodes[key].email === userEmail) {
-                        associatedBetaCodeKey = key;
-                        break; // Found the beta code
-                    }
-                }
-            }
+            const newBetaCodeRef = child(betaCodesRef, `${Date.now()}`);
+            
+            await set(newBetaCodeRef, {
+                code: newBetaCode,
+                email: userEmail,
+                createdAt: new Date().toISOString(),
+                project: appData.project || '8ball',
+                approved: true
+            });
 
-            if (associatedBetaCodeKey) {
-                // 3. Update beta code entry with UID
-                const betaCodeUserRef = ref(database, `betaCodes/${associatedBetaCodeKey}/uid`);
-                await set(betaCodeUserRef, uid);
-                console.log(`Beta code ${betaCodes[associatedBetaCodeKey].code} associated with UID: ${uid}`);
+            // Now update the application status
+            const applicationStatusRef = ref(database, `applications/${appId}/status`);
+            await set(applicationStatusRef, 'approved');
+            
+            // Also store the beta code in the application
+            const betaCodeRef = ref(database, `applications/${appId}/betaCode`);
+            await set(betaCodeRef, newBetaCode);
 
-                // 4. (Optional) Update application entry with UID - if you want to store it there too
-                const applicationUserRef = ref(database, `applications/${appId}/uid`);
-                await set(applicationUserRef, uid);
-
-                // 5. Update application status to 'approved'
-                const applicationStatusRef = ref(database, `applications/${appId}/status`);
-                await set(applicationStatusRef, 'approved');
-
-                // 6. Sign out admin user (important!)
-                await signOut(auth);
-
-                adminLoginMessage.textContent = 'Application approved successfully!';
-                adminLoginMessage.className = 'form-message success';
-                loadBetaApplications(); // Refresh application list
-                alert('Application approved and UID associated!'); // User feedback alert
-
-            } else {
-                adminLoginMessage.textContent = 'Error: Beta code not found for this user.';
-                adminLoginMessage.className = 'form-message error';
-                alert('Error: Beta code not found for this user. Approval failed.');
-                await signOut(auth); // Still sign out admin in case of error
-            }
-
+            adminLoginMessage.textContent = `Application approved! Beta code ${newBetaCode} created for ${userEmail}.`;
+            adminLoginMessage.className = 'form-message success';
+            loadBetaApplications(); // Refresh application list
+            showCustomAlert(`Application approved! User can now log in with their email and beta code: ${newBetaCode}`, 'success');
 
         } catch (error) {
             console.error("Error approving application:", error);
             adminLoginMessage.textContent = 'Error approving application. See console for details.';
             adminLoginMessage.className = 'form-message error';
-            alert('Error approving application. Check console. Error: ' + error.message);
-            await signOut(auth); // Sign out admin on error
+            showCustomAlert(`Error approving application: ${error.message}`, 'error');
         }
+    };
+
+    // Function to generate a random beta code
+    const generateBetaCode = () => {
+        // Generate a 8-character code with letters and numbers
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar-looking characters
+        let result = '';
+        for (let i = 0; i < 8; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
     };
 
     // Function to handle application denial
     const handleDenyApplication = async (appId) => {
-        console.log(`Deny application: ${appId}`);
-        // alert(`Deny action for application ID: ${appId} - Functionality to be implemented.`); // Removed placeholder alert
-
         const applicationsRef = ref(database, `applications/${appId}`);
         const snapshot = await get(applicationsRef);
         if (!snapshot.exists()) {
-            alert('Application not found.');
+            showCustomAlert('Application not found.', 'error');
             return;
         }
-        // No need to get email or UID for denial
 
-        adminLoginMessage.textContent = 'Denying application...'; // Use admin message for feedback
+        adminLoginMessage.textContent = 'Denying application...';
         adminLoginMessage.className = 'form-message';
 
         try {
-            // 1. Update application status to 'denied'
             const applicationStatusRef = ref(database, `applications/${appId}/status`);
             await set(applicationStatusRef, 'denied');
 
             adminLoginMessage.textContent = 'Application denied successfully!';
             adminLoginMessage.className = 'form-message success';
 
-            // ✅ Remove the application card from the list in the UI
             const applicationCardToRemove = document.querySelector(`.application-card .deny-btn[data-app-id="${appId}"]`).closest('.application-card');
             if (applicationCardToRemove) {
                 applicationCardToRemove.remove();
             }
 
-            alert('Application denied!'); // User feedback alert
-
+            showCustomAlert('Application denied successfully.', 'success');
         } catch (error) {
             console.error("Error denying application:", error);
             adminLoginMessage.textContent = 'Error denying application. See console for details.';
             adminLoginMessage.className = 'form-message error';
-            alert('Error denying application. Check console. Error: ' + error.message);
+            showCustomAlert('Error denying application: ' + error.message, 'error');
         }
     };
 
     // Sign out user
-    const signOutUser = () => {
-        currentUser = null;
-        validatedBetaCode = null;
-        localStorage.removeItem('betaUserSession');
-        updateAuthUI(false); // ✅ Call updateAuthUI for sign out
-        adminPortal.classList.remove('active'); // Hide admin portal on sign out
-        adminDashboard.classList.add('hidden'); // Hide admin dashboard on sign out
-        adminLoginForm.classList.remove('hidden'); // Show admin login form again
+    const signOutUser = async () => {
+        try {
+            await signOut(auth);
+            currentUser = null;
+            validatedBetaCode = null;
+            localStorage.removeItem('betaUserSession');
+            updateAuthUI(false);
+            adminPortal.classList.remove('active');
+            adminPortal.classList.add('hidden');
+            adminDashboard.classList.add('hidden');
+            adminLoginForm.classList.remove('hidden');
+            showCustomAlert('You have been successfully signed out.', 'success');
+        } catch (error) {
+            console.error("Error signing out:", error);
+            showCustomAlert('Error signing out. Please try again.', 'error');
+        }
     };
 
     // Update the UI based on authentication state (Modified to handle admin UI)
-    const updateAuthUI = (isLoggedIn, isAdmin = false) => { // ✅ Added isAdmin parameter
+    const updateAuthUI = (isLoggedIn, isAdmin = false) => {
         if (isLoggedIn && currentUser) {
             // Update auth status in nav
             authStatus.classList.add('logged-in');
-            if (isAdmin) { // ✅ Admin user UI
-                loginLink.textContent = `Admin`; // Or use your email prefix: `${currentUser.email.split('@')[0]}`
-                loginLink.href = '#admin-portal'; // Link to admin portal
-                authStatus.classList.add('admin-mode-header'); // Add class for admin header styling
-            } else { // Beta user UI (existing)
+            if (isAdmin) {
+                loginLink.textContent = `Admin`;
+                loginLink.href = '#admin-portal';
+                authStatus.classList.add('admin-mode-header');
+            } else {
                 loginLink.textContent = `${currentUser.email.split('@')[0]}`;
                 loginLink.href = '#account';
-                authStatus.classList.remove('admin-mode-header'); // Ensure class is removed in beta user mode
+                authStatus.classList.remove('admin-mode-header');
             }
 
-            // Show feedback forms and hide login prompt (existing)
+            // Show feedback forms and hide login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.add('hidden');
             if (feedbackForms) feedbackForms.classList.remove('hidden');
 
-            // Show download section if it exists (existing)
+            // Show download section if it exists
             if (downloadSection) downloadSection.classList.remove('hidden');
 
-            // Add dropdown menu (Modified for Admin Portal link)
+            // Create dropdown menu with hover effect
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown-menu';
             dropdown.innerHTML = `
                 <ul>
                     ${isAdmin ? `<li><a href="#admin-portal" id="admin-portal-link-dropdown">Admin Portal</a></li>` : ''}
-                    <li><button id="sign-out-btn" class="btn-outline">Sign Out</button></li>
+                    <li><button id="sign-out-btn" class="btn-text">Sign Out</button></li>
+                    ${!isAdmin ? `<li><button id="resign-btn" class="btn-text resign-btn">Resign from Testing</button></li>` : ''}
                 </ul>
             `;
 
             // Only add dropdown if it doesn't already exist
             if (!authStatus.querySelector('.dropdown-menu')) {
                 authStatus.appendChild(dropdown);
+                
+                // Sign out button event listener
                 document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-                if (isAdmin) { // ✅ Event listener for Admin Portal dropdown link
+                
+                // Admin portal link event listener
+                if (isAdmin) {
                     document.getElementById('admin-portal-link-dropdown').addEventListener('click', (e) => {
                         e.preventDefault();
-                        adminPortal.classList.add('active'); // Show admin portal when clicked in dropdown
-                        adminPortal.classList.remove('initially-hidden'); // Ensure it's not hidden by initial class
+                        adminPortal.classList.remove('hidden');
+                        adminPortal.classList.remove('initially-hidden');
+                        adminPortal.classList.add('active');
                     });
+                }
+                
+                // Resign from testing button event listener
+                if (!isAdmin && document.getElementById('resign-btn')) {
+                    document.getElementById('resign-btn').addEventListener('click', handleResignFromTesting);
                 }
             }
         } else {
-            // Update auth status in nav
+            // Update auth status in nav for logged out state
             authStatus.classList.remove('logged-in');
             loginLink.textContent = 'Log In';
             loginLink.href = '#login';
-            authStatus.classList.remove('admin-mode-header'); // Ensure class is removed when logged out
+            authStatus.classList.remove('admin-mode-header');
             
             // Hide feedback forms and show login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.remove('hidden');
@@ -655,21 +681,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             set(newFeedbackRef, data)
                 .then(() => {
-                    // Clear the form
                     form.reset();
                     
-                    // Show success message
                     const successMsg = document.createElement('div');
                     successMsg.className = 'feedback-success';
                     successMsg.textContent = 'Thank you for your feedback!';
                     
-                    // Remove existing success message if any
                     const existingMsg = form.querySelector('.feedback-success');
                     if (existingMsg) existingMsg.remove();
                     
                     form.appendChild(successMsg);
                     
-                    // Hide success message after 3 seconds
                     setTimeout(() => {
                         successMsg.remove();
                         const option = form.closest('.feedback-option');
@@ -678,11 +700,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch(error => {
                     console.error("Error submitting feedback:", error);
-                    alert("There was an error submitting your feedback. Please try again.");
+                    showCustomAlert("There was an error submitting your feedback. Please try again.", "error");
                 });
         } catch (error) {
             console.error("Error with feedback submission:", error);
-            alert("There was an error submitting your feedback. Please try again.");
+            showCustomAlert("There was an error submitting your feedback. Please try again.", "error");
         }
     };
     
@@ -983,12 +1005,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     adminDashboard.classList.remove('hidden');
                     adminLoginMessage.textContent = '';
                     // loadBetaApplications();
-                    alert('Admin login successful!');
+                    showCustomAlert('Admin login successful!', 'success');
                 } catch (error) {
                     console.error("Admin login error:", error);
                     adminLoginMessage.textContent = 'Invalid credentials. Please try again.';
                     adminLoginMessage.className = 'form-message error';
-                    alert('Admin login failed. Check credentials and console.');
+                    showCustomAlert('Admin login failed. Check credentials and console.', 'error');
                 }
             });
         }
@@ -1003,10 +1025,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     applicationsList.innerHTML = '<p>Loading applications...</p>';
                     adminLoginMessage.textContent = '';
                     adminLoginMessage.className = 'form-message';
-                    alert('Admin signed out.');
+                    showCustomAlert('Admin signed out.', 'success');
                 } catch (error) {
                     console.error("Admin sign out error:", error);
-                    alert('Error signing out admin.');
+                    showCustomAlert('Error signing out admin.', 'error');
                 }
             });
         }
@@ -1015,10 +1037,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewWebsiteBtn) {
             viewWebsiteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                adminPortal.classList.remove('active'); // Hide Admin Portal
+                adminPortal.classList.remove('active');
                 adminPortal.classList.add('hidden');
-                // Optionally scroll back to top or a relevant section
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // Example: Scroll to top
+                adminPortal.classList.add('initially-hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showCustomAlert('Viewing website. Click "Admin" in the header to return to admin portal.', 'info');
             });
         }
     };
@@ -1111,4 +1134,149 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize everything
     initAuth();
     initFeedbackForms();
+
+    // Add this custom alert function to script.js
+    const showCustomAlert = (message, type = 'info') => {
+        // Remove any existing alerts
+        const existingAlert = document.querySelector('.custom-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Create alert element
+        const alertEl = document.createElement('div');
+        alertEl.className = `custom-alert ${type}`;
+        alertEl.innerHTML = `
+            <div class="alert-content">
+                <p>${message}</p>
+                <button class="close-alert">&times;</button>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(alertEl);
+        
+        // Show with animation
+        setTimeout(() => {
+            alertEl.classList.add('active');
+        }, 10);
+        
+        // Add close button listener
+        alertEl.querySelector('.close-alert').addEventListener('click', () => {
+            alertEl.classList.remove('active');
+            setTimeout(() => {
+                alertEl.remove();
+            }, 300);
+        });
+        
+        // Auto dismiss after 5 seconds for non-error alerts
+        if (type !== 'error') {
+            setTimeout(() => {
+                if (alertEl.parentNode) {
+                    alertEl.classList.remove('active');
+                    setTimeout(() => {
+                        if (alertEl.parentNode) {
+                            alertEl.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+    };
+
+    // Add resign from testing functionality
+    const handleResignFromTesting = () => {
+        if (!currentUser || !currentUser.email) {
+            showCustomAlert('You must be logged in to resign from testing.', 'error');
+            return;
+        }
+        
+        // Ask for confirmation
+        const confirmResign = confirm('Are you sure you want to resign from beta testing? This will notify the admin and you will lose access to beta builds.');
+        
+        if (confirmResign) {
+            try {
+                // Add to resignations in database
+                const resignationsRef = ref(database, 'resignations');
+                const newResignationRef = child(resignationsRef, `${Date.now()}`);
+                
+                const resignationData = {
+                    email: currentUser.email,
+                    betaCode: currentUser.betaCode,
+                    timestamp: new Date().toISOString(),
+                    project: currentUser.project || 'unknown'
+                };
+                
+                set(newResignationRef, resignationData)
+                    .then(() => {
+                        // Sign out the user
+                        signOutUser();
+                        showCustomAlert('You have successfully resigned from beta testing. Thank you for your participation!', 'info');
+                    })
+                    .catch(error => {
+                        console.error("Error submitting resignation:", error);
+                        showCustomAlert("There was an error processing your resignation. Please try again.", "error");
+                    });
+            } catch (error) {
+                console.error("Error with resignation submission:", error);
+                showCustomAlert("There was an error processing your resignation. Please try again.", "error");
+            }
+        }
+    };
+
+    // Function to load resignations for admin portal
+    const loadResignations = () => {
+        const resignationsList = document.getElementById('resignations-list');
+        if (!resignationsList) return;
+        
+        resignationsList.innerHTML = '<p>Loading resignation requests...</p>';
+        const resignationsRef = ref(database, 'resignations');
+        
+        onValue(resignationsRef, (snapshot) => {
+            if (snapshot.exists()) {
+                resignationsList.innerHTML = '';
+                const resignationsData = snapshot.val();
+                
+                Object.keys(resignationsData).forEach(resignId => {
+                    const resign = resignationsData[resignId];
+                    const resignCard = document.createElement('div');
+                    resignCard.className = 'resignation-card';
+                    resignCard.innerHTML = `
+                        <h4>${resign.email}</h4>
+                        <p>Beta Code: ${resign.betaCode || 'N/A'}</p>
+                        <p>Project: ${resign.project}</p>
+                        <p>Requested: ${new Date(resign.timestamp).toLocaleString()}</p>
+                    `;
+                    resignationsList.appendChild(resignCard);
+                });
+            } else {
+                resignationsList.innerHTML = '<p>No resignation requests yet.</p>';
+            }
+        }, (error) => {
+            console.error("Error fetching resignations:", error);
+            resignationsList.innerHTML = '<p class="error">Error loading resignation requests.</p>';
+        });
+    };
+
+    // Better alternative: modify the handleApproveApplication function to include custom confirm
+    const createCloseButton = () => {
+        // Only create if it doesn't exist already
+        if (document.querySelector('.close-admin')) return;
+        
+        const adminContainer = document.querySelector('.admin-container');
+        if (adminContainer) {
+            const closeButton = document.createElement('span');
+            closeButton.className = 'close-admin';
+            closeButton.innerHTML = '&times;';
+            
+            closeButton.addEventListener('click', () => {
+                adminPortal.classList.remove('active');
+                adminPortal.classList.add('hidden');
+                adminPortal.classList.add('initially-hidden');
+                showCustomAlert('Admin Portal hidden. Click "Admin" in the header to return.', 'info');
+            });
+            
+            adminContainer.insertBefore(closeButton, adminContainer.firstChild.nextSibling);
+        }
+    };
 }); 
