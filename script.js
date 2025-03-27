@@ -596,6 +596,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackOptions.forEach(otherOption => {
                     if (otherOption !== option && otherOption.classList.contains('active')) {
                         otherOption.classList.remove('active');
+                        // Ensure any forms inside are properly hidden
+                        const otherForm = otherOption.querySelector('.feedback-form');
+                        if (otherForm) {
+                            otherForm.style.display = 'none';
+                            setTimeout(() => {
+                                otherForm.style.display = '';
+                            }, 300);
+                        }
                     }
                 });
                 
@@ -1279,4 +1287,25 @@ document.addEventListener('DOMContentLoaded', () => {
             adminContainer.insertBefore(closeButton, adminContainer.firstChild.nextSibling);
         }
     };
+
+    // Update the login form HTML structure
+    function updateLoginFormOrder() {
+        const betaCodeGroup = document.getElementById('beta-code-group');
+        const loginEmailGroup = document.getElementById('login-email-group');
+        const loginForm = document.getElementById('login-form');
+        
+        // Only reorder if elements exist and email is not already first
+        if (betaCodeGroup && loginEmailGroup && loginForm.firstElementChild !== loginEmailGroup) {
+            // Remove the elements from their current position
+            betaCodeGroup.remove();
+            loginEmailGroup.remove();
+            
+            // Insert them in the new order
+            loginForm.insertBefore(betaCodeGroup, loginForm.firstElementChild.nextSibling);
+            loginForm.insertBefore(loginEmailGroup, loginForm.firstElementChild);
+        }
+    }
+
+    // Call this function once the DOM is loaded
+    document.addEventListener('DOMContentLoaded', updateLoginFormOrder);
 }); 

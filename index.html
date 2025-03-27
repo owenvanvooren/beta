@@ -177,10 +177,8 @@
                 <div id="feedback-forms" class="feedback-forms hidden">
                     <div class="feedback-options">
                         <div id="bug-report" class="feedback-option">
-                            <div class="icon">🐞</div>
-                            <h3>Report a Bug</h3>
-                            <p>Found something that's not working right? Let me know!</p>
-                            <form id="bug-report-form" class="feedback-form">
+                            <h3><span class="icon">🐞</span>Report a Bug</h3>
+                            <div class="feedback-form">
                                 <div class="form-group">
                                     <label for="bug-title">Bug Title</label>
                                     <input type="text" id="bug-title" name="title" required placeholder="Brief description of the issue">
@@ -199,13 +197,11 @@
                                     </select>
                                 </div>
                                 <button type="submit" class="btn-primary">Submit Bug Report</button>
-                            </form>
+                            </div>
                         </div>
                         <div id="feature-suggestion" class="feedback-option">
-                            <div class="icon">💡</div>
-                            <h3>Suggest a Feature</h3>
-                            <p>Have a brilliant idea to make things better? I'm all ears!</p>
-                            <form id="feature-form" class="feedback-form">
+                            <h3><span class="icon">💡</span>Suggest a Feature</h3>
+                            <div class="feedback-form">
                                 <div class="form-group">
                                     <label for="feature-title">Feature Title</label>
                                     <input type="text" id="feature-title" name="title" required placeholder="Name your brilliant idea">
@@ -215,13 +211,11 @@
                                     <textarea id="feature-details" name="details" rows="5" required placeholder="Describe your feature idea and why it would be valuable..."></textarea>
                                 </div>
                                 <button type="submit" class="btn-primary">Submit Feature Idea</button>
-                            </form>
+                            </div>
                         </div>
                         <div id="general-feedback" class="feedback-option">
-                            <div class="icon">🎮</div>
-                            <h3>Share Your Experience</h3>
-                            <p>Tell me about your overall experience with the beta.</p>
-                            <form id="experience-form" class="feedback-form">
+                            <h3><span class="icon">🎮</span>Share Your Experience</h3>
+                            <div class="feedback-form">
                                 <div class="form-group">
                                     <label for="experience-rating">Rating</label>
                                     <div class="rating-container">
@@ -244,7 +238,7 @@
                                     <textarea id="experience-details" name="details" rows="5" required placeholder="What did you like? What could be better?"></textarea>
                                 </div>
                                 <button type="submit" class="btn-primary">Submit Feedback</button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -261,14 +255,23 @@
                         <p class="version-date">Updated: March 26, 2025</p>
                         <p class="version-notes">Initial beta release with basic functionality</p>
                         <a href="8ball.pdx.zip" download class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
-                        <div id="spacer"></div>
+                        <hr id="divider">
                         <h2 id="step-title">Steps to install:</h1>
+                            <b id="hardware-step">On Playdate Hardware:</b>
                             <ol id="step-list">
-                                <li>Download the "8ball.pdx.zip" file</li>
-                                <li>Unzip the downloaded file</li>
-                                <li>Install the unzipped "8ball.pdx" file on your Playdate (learn how at <a href="https://help.play.date/games/sideloading/">help.play.date/games/sideloading/</a>)</li>
-                                <li>Play 8ball, and report bugs, request features, and share your experience to earn <b>brownie points</b>.</li>
-                            </ul>
+                                <li>Download the "8ball.pdx.zip" file.</li>
+                                <li>Unzip the downloaded file.</li>
+                                <li>Install the unzipped "8ball.pdx" file on your Playdate (learn how at <a href="https://help.play.date/games/sideloading/">help.play.date/games/sideloading/</a>).</li>
+                                <li>Play 8ball, and report bugs, request features, and share your experience to earn <b>brownie points</b>!</li>
+                            </ol>
+                            <b id="software-step">On Playdate Simulator:</b>
+                            <ol id="step-list">
+                                <li>Download the "8ball.pdx.zip" file.</li>
+                                <li>Unzip the downloaded file.</li>
+                                <li>Open the unzipped "8ball.pdx" file with the Simulator (learn how at <a href="https://help.play.date/games/sideloading/#:~:text=Run%20your%20game%20in%20the,it%20will%20start%20running%20automatically.">help.play.date/games/sideloading/</a>).</li>
+                                <li>Play 8ball, and report bugs, request features, and share your experience to earn <b>brownie points</b>!</li>
+                            </ol>
+                            <h4 id="testing-thanks">Thanks for testing!</h4>
                     </div>
                 </div>
             </div>
