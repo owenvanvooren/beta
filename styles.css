@@ -10,6 +10,17 @@
     --border-radius: 12px;
     --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    
+    /* Custom cursor definitions */
+    --cursor-default: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.4"/><circle cx="12" cy="12" r="3" fill="%235d5efa"/></svg>') 12 12, auto;
+    --cursor-interactive: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, pointer;
+    --cursor-button: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="white" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="white"/></svg>') 12 12, pointer;
+    
+    /* Grid background pattern */
+    --grid-size: 24px;
+    --grid-line-color: rgba(0, 0, 0, 0.04);
+    --grid-dot-color: rgba(93, 94, 250, 0.08);
+    --grid-dot-size: 1px;
 }
 
 * {
@@ -19,7 +30,7 @@
 }
 
 html {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.4"/><circle cx="12" cy="12" r="3" fill="%235d5efa"/></svg>') 12 12, auto;
+    cursor: var(--cursor-default);
 }
 
 body {
@@ -28,6 +39,30 @@ body {
     color: var(--text-color);
     background-color: var(--background-color);
     overflow-x: hidden;
+    background-image: 
+        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px),
+        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
+    background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
+    background-position: center center;
+}
+
+/* Interactive elements */
+a, button, input[type="submit"], input[type="button"], .btn-primary, .btn-secondary, .btn-outline, 
+select, input[type="checkbox"], input[type="radio"], label[for], .beta-card, 
+.close-auth, .feedback-option h3, .application-actions button, .dropdown-menu a, 
+.dropdown-menu button, .install-section:hover {
+    cursor: var(--cursor-interactive);
+}
+
+/* Buttons and focused elements */
+.btn-primary, .btn-secondary, .btn-outline, button[type="submit"], input[type="submit"] {
+    cursor: var(--cursor-button);
+}
+
+/* Specific elements that should use the default cursor */
+input[type="text"], input[type="email"], input[type="password"], textarea {
+    cursor: text;
 }
 
 .container {
@@ -41,7 +76,6 @@ a {
     color: var(--primary-color);
     text-decoration: none;
     transition: var(--transition);
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, pointer;
 }
 
 a:hover {
@@ -119,6 +153,11 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+    background-image: 
+        linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px),
+        radial-gradient(var(--grid-dot-color) calc(var(--grid-dot-size) * 0.8), transparent calc(var(--grid-dot-size) * 0.8));
+    background-size: calc(var(--grid-size) * 0.8) calc(var(--grid-size) * 0.8);
 }
 
 .logo {
@@ -224,7 +263,7 @@ nav a:hover::after {
     top: 15px;
     right: 20px;
     font-size: 1.8rem;
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, pointer;
+    cursor: var(--cursor-interactive);
     transition: var(--transition);
 }
 
@@ -267,7 +306,7 @@ nav a:hover::after {
 .feedback-option {
     padding: 1.5rem;
     transition: var(--transition);
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, auto;
+    cursor: var(--cursor-interactive);
 }
 
 .feedback-form {
@@ -289,6 +328,12 @@ nav a:hover::after {
 .download {
     background: linear-gradient(145deg, #f5f7fa 0%, #e4e8f0 100%);
     padding: 5rem 0;
+    position: relative;
+    background-image: 
+        linear-gradient(rgba(93, 94, 250, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 94, 250, 0.03) 1px, transparent 1px),
+        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
+    background-size: calc(var(--grid-size) * 1.2) calc(var(--grid-size) * 1.2);
 }
 
 .download h2 {
@@ -431,7 +476,7 @@ nav a:hover::after {
 }
 
 .rating label {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, pointer;
+    cursor: var(--cursor-interactive);
     color: #ddd;
     transition: var(--transition);
 }
@@ -452,6 +497,12 @@ nav a:hover::after {
     text-align: center;
     position: relative;
     overflow: hidden;
+    background-image: 
+        linear-gradient(135deg, #f5f7fa 0%, #dfe5f2 100%),
+        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px),
+        radial-gradient(var(--grid-dot-color) calc(var(--grid-dot-size) * 1.5), transparent calc(var(--grid-dot-size) * 1.5));
+    background-size: 100% 100%, calc(var(--grid-size) * 1.5) calc(var(--grid-size) * 1.5), calc(var(--grid-size) * 1.5) calc(var(--grid-size) * 1.5);
 }
 
 .hero::before {
@@ -492,7 +543,6 @@ nav a:hover::after {
     border-radius: var(--border-radius);
     font-weight: 600;
     transition: var(--transition);
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="white" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="white"/></svg>') 12 12, pointer;
     border: none;
     font-size: 1rem;
 }
@@ -536,6 +586,8 @@ nav a:hover::after {
 /* Beta Cards Section */
 .betas {
     padding: 5rem 0;
+    position: relative;
+    z-index: 1;
 }
 
 .betas h2 {
@@ -683,6 +735,12 @@ nav a:hover::after {
 .signup {
     padding: 5rem 0;
     background-color: #f5f7fa;
+    position: relative;
+    background-image: 
+        linear-gradient(rgba(93, 94, 250, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(93, 94, 250, 0.03) 1px, transparent 1px),
+        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
+    background-size: calc(var(--grid-size) * 1.2) calc(var(--grid-size) * 1.2);
 }
 
 .signup h2, .signup p {
@@ -775,7 +833,7 @@ form .btn-primary {
     box-shadow: var(--box-shadow);
     transition: var(--transition);
     padding: 1.5rem;
-    cursor: pointer;
+    cursor: var(--cursor-interactive);
     position: relative;
     overflow: hidden;
 }
@@ -833,6 +891,11 @@ footer {
     background-color: var(--dark-color);
     color: white;
     padding: 3rem 0;
+    position: relative;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
 }
 
 .footer-content {
@@ -990,6 +1053,10 @@ footer {
     animation: shake 0.5s ease-in-out;
 }
 
+#feedback-login-prompt p {
+    padding-bottom: 34px;
+}
+
 /* Animated background for the hero */
 @keyframes gradientBG {
     0% {
@@ -1078,6 +1145,10 @@ footer {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    background-image: 
+        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
+    background-size: calc(var(--grid-size) * 2) calc(var(--grid-size) * 2);
 }
 
 .admin-portal.active {
@@ -1108,7 +1179,7 @@ footer {
     top: 15px;
     right: 20px;
     font-size: 1.8rem;
-    cursor: pointer;
+    cursor: var(--cursor-interactive);
     transition: all 0.3s ease;
     z-index: 10;
 }
@@ -1204,7 +1275,7 @@ footer {
     background: none;
     border: none;
     font-size: 1.2rem;
-    cursor: pointer;
+    cursor: var(--cursor-interactive);
     color: var(--light-text);
 }
 
@@ -1298,7 +1369,7 @@ footer {
     background: none;
     border: none;
     font-size: 0.9rem;
-    cursor: pointer;
+    cursor: var(--cursor-interactive);
     color: var(--text-color);
     transition: background-color 0.2s ease;
 }
@@ -1482,4 +1553,81 @@ nav ul {
 .reference-link a {
     text-decoration: underline;
     font-weight: 600;
+}
+
+/* Special overrides for rating stars */
+.rating label {
+    cursor: var(--cursor-interactive);
+}
+
+/* Form elements that should have interactive cursor */
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    cursor: var(--cursor-interactive);
+}
+
+/* Close buttons and interactive actions */
+.close-auth, .close-modal, .close-alert, .close-admin {
+    cursor: var(--cursor-interactive);
+}
+
+/* Admin dashboard action buttons */
+.admin-dashboard-actions button {
+    cursor: var(--cursor-button);
+}
+
+/* Application buttons */
+.application-actions .approve-btn, .application-actions .deny-btn {
+    cursor: var(--cursor-button);
+}
+
+/* Beta card hover effect - make sure to use the interactive cursor */
+.beta-card:hover, .download-card:hover, .feedback-option:hover {
+    cursor: var(--cursor-interactive);
+}
+
+/* Login and signup form buttons */
+#login-form button, #admin-login-form button, #beta-signup-form button,
+#bug-report-form button, #feature-form button, #experience-form button {
+    cursor: var(--cursor-button);
+}
+
+/* Checkbox and radio buttons */
+input[type="checkbox"] + label, input[type="radio"] + label {
+    cursor: var(--cursor-interactive);
+}
+
+/* Dropdown menu items */
+.dropdown-menu ul li a, 
+.dropdown-menu ul li button {
+    cursor: var(--cursor-interactive);
+}
+
+/* Installation sections */
+.install-section {
+    cursor: var(--cursor-default);
+}
+.install-section:hover {
+    cursor: var(--cursor-interactive);
+}
+
+/* Download links */
+.download-link, a[download] {
+    cursor: var(--cursor-button);
+}
+
+/* Reference links */
+.reference-link a {
+    cursor: var(--cursor-interactive);
+}
+
+/* Nav links */
+nav ul li a {
+    cursor: var(--cursor-interactive);
+}
+
+/* Star rating interaction */
+.rating input:checked ~ label,
+.rating label:hover,
+.rating label:hover ~ label {
+    cursor: var(--cursor-interactive);
 } 
