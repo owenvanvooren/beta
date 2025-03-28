@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const auth = window.firebaseAuth;
     const database = window.firebaseDatabase;
     const { ref, set, get, child, onValue } = window.firebaseRefs;
-    const { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification } = window.firebaseAuthFunctions;
+    const { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInAnonymously } = window.firebaseAuthFunctions;
     
     // DOM Elements
     const authOverlay = document.getElementById('auth-overlay');
@@ -60,16 +60,26 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const session = JSON.parse(savedSession);
                 if (session && session.email && session.betaCode && session.expiry > Date.now()) {
-                    // Session is still valid
-                    validateBetaCode(session.betaCode, session.email)
-                        .then(valid => {
-                            if (valid) {
-                                signInUser(session.email, session.betaCode);
-                            } else {
-                                // Session is no longer valid
+                    // Sign in anonymously first to ensure authentication before validation
+                    signInAnonymously(auth).then(() => {
+                        // Session is still valid
+                        validateBetaCode(session.betaCode, session.email)
+                            .then(valid => {
+                                if (valid) {
+                                    signInUser(session.email, session.betaCode);
+                                } else {
+                                    // Session is no longer valid
+                                    localStorage.removeItem('betaUserSession');
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error validating session beta code:", error);
                                 localStorage.removeItem('betaUserSession');
-                            }
-                        });
+                            });
+                    }).catch(error => {
+                        console.error("Error signing in anonymously from session:", error);
+                        localStorage.removeItem('betaUserSession');
+                    });
                 }
             } catch (e) {
                 console.error('Error parsing session data', e);
@@ -160,24 +170,43 @@ document.addEventListener('DOMContentLoaded', () => {
                         showCustomAlert('Admin login failed. Check credentials and console. Error: ' + error.message, 'error');
                     }
                 } else {
-                    // **Beta Code Login Flow (Existing Logic)**
+                    // **Beta Code Login Flow with Anonymous Auth**
                     const betaCode = document.getElementById('beta-code').value.trim();
-
+                    
+                    // Show loading state
+                    showLoginError("Validating beta code...");
+                    
                     try {
-                        const isValid = await validateBetaCode(betaCode, email);
-                        if (isValid) {
-                            signInUser(email, betaCode);
-                            authOverlay.classList.remove('active');
-                            
-                            // Save session for 30 days
-                            const session = {
-                                email: email,
-                                betaCode: betaCode,
-                                expiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
-                            };
-                            localStorage.setItem('betaUserSession', JSON.stringify(session));
-                        } else {
-                            showLoginError("Invalid beta code or email. Please try again or apply for access.");
+                        // Sign in anonymously first to ensure database rules allow access
+                        try {
+                            await signInAnonymously(auth);
+                        } catch (authError) {
+                            console.error("Anonymous auth error:", authError);
+                            showLoginError("Authentication failed. Please try again later.");
+                            return;
+                        }
+                        
+                        // Now validate the beta code
+                        try {
+                            const isValid = await validateBetaCode(betaCode, email);
+                            if (isValid) {
+                                signInUser(email, betaCode);
+                                authOverlay.classList.remove('active');
+                                
+                                // Save session for 30 days
+                                const session = {
+                                    email: email,
+                                    betaCode: betaCode,
+                                    expiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+                                };
+                                localStorage.setItem('betaUserSession', JSON.stringify(session));
+                                showCustomAlert('Login successful!', 'success');
+                            } else {
+                                showLoginError("Invalid beta code or email. Please try again or apply for access.");
+                            }
+                        } catch (validationError) {
+                            console.error("Beta code validation error:", validationError);
+                            showLoginError("Error validating beta code. Please try again later.");
                         }
                     } catch (error) {
                         console.error("Login error:", error);
@@ -247,6 +276,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Validate beta code against database
     const validateBetaCode = async (code, email) => {
         try {
+            // Ensure user is authenticated before accessing the database
+            if (!auth.currentUser) {
+                // Sign in anonymously first
+                try {
+                    await signInAnonymously(auth);
+                } catch (authError) {
+                    console.error("Error signing in anonymously:", authError);
+                    throw new Error("Authentication failed. Please try again.");
+                }
+            }
+            
             // Get the beta codes from the database
             const dbRef = ref(database);
             const snapshot = await get(child(dbRef, 'betaCodes'));
@@ -280,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         } catch (error) {
             console.error("Error validating beta code:", error);
-            return false;
+            throw error;
         }
     };
     
@@ -1137,50 +1177,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add this custom alert function to script.js
     const showCustomAlert = (message, type = 'info') => {
-        // Remove any existing alerts
-        const existingAlert = document.querySelector('.custom-alert');
-        if (existingAlert) {
-            existingAlert.remove();
+        // Check if the custom alert container exists
+        let alertContainer = document.querySelector('.custom-alert');
+        
+        // If not, create it
+        if (!alertContainer) {
+            alertContainer = document.createElement('div');
+            alertContainer.className = 'custom-alert';
+            document.body.appendChild(alertContainer);
         }
         
-        // Create alert element
-        const alertEl = document.createElement('div');
-        alertEl.className = `custom-alert ${type}`;
-        alertEl.innerHTML = `
+        // Set the alert content
+        alertContainer.innerHTML = `
             <div class="alert-content">
                 <p>${message}</p>
                 <button class="close-alert">&times;</button>
             </div>
         `;
         
-        // Add to body
-        document.body.appendChild(alertEl);
+        // Set the alert type
+        alertContainer.className = `custom-alert ${type}`;
         
-        // Show with animation
+        // Show the alert
         setTimeout(() => {
-            alertEl.classList.add('active');
-        }, 10);
+            alertContainer.classList.add('active');
+        }, 100);
         
-        // Add close button listener
-        alertEl.querySelector('.close-alert').addEventListener('click', () => {
-            alertEl.classList.remove('active');
+        // Hide the alert after 5 seconds
+        const hideTimeout = setTimeout(() => {
+            alertContainer.classList.remove('active');
             setTimeout(() => {
-                alertEl.remove();
+                alertContainer.remove();
             }, 300);
-        });
+        }, 5000);
         
-        // Auto dismiss after 5 seconds for non-error alerts
-        if (type !== 'error') {
-            setTimeout(() => {
-                if (alertEl.parentNode) {
-                    alertEl.classList.remove('active');
-                    setTimeout(() => {
-                        if (alertEl.parentNode) {
-                            alertEl.remove();
-                        }
-                    }, 300);
-                }
-            }, 5000);
+        // Allow manual closing of the alert
+        const closeBtn = alertContainer.querySelector('.close-alert');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(hideTimeout);
+                alertContainer.classList.remove('active');
+                setTimeout(() => {
+                    alertContainer.remove();
+                }, 300);
+            });
         }
     };
 
