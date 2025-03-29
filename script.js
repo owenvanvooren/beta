@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Firebase Authentication and Database
+
     const auth = window.firebaseAuth;
     const database = window.firebaseDatabase;
     const { ref, set, get, child, onValue } = window.firebaseRefs;
     const { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendEmailVerification, signInAnonymously } = window.firebaseAuthFunctions;
-    
-    // DOM Elements
+
+
     const authOverlay = document.getElementById('auth-overlay');
     const loginLink = document.getElementById('login-link');
     const closeAuthBtns = document.querySelectorAll('.close-auth');
@@ -19,16 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const featureForm = document.getElementById('feature-form');
     const experienceForm = document.getElementById('experience-form');
     const closeAuthRedirects = document.querySelectorAll('.close-auth-redirect');
-    
-    // Beta Application Form
+    const secureDownloadLink = document.getElementById('secure-download-link');
+
     const betaSignupForm = document.getElementById('beta-signup-form');
     const signupMessage = document.getElementById('signup-message');
-    
-    // Store currently authenticated user info
+
+
     let currentUser = null;
     let validatedBetaCode = null;
-    
-    // DOM Elements (Add new elements)
+
+
     const betaCodeGroup = document.getElementById('beta-code-group');
     const loginEmailGroup = document.getElementById('login-email-group');
     const loginPasswordGroup = document.getElementById('login-password-group');
@@ -40,35 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupLinkAuthMessage = loginForm.nextElementSibling;
 
     let isAdminLoginMode = false;
-    
-    // DOM Elements (Get beta code input element)
-    const betaCodeInput = document.getElementById('beta-code'); // ✅ Get the beta code input element
 
-    // DOM Elements (Get beta login link element)
-    const betaLoginLink = document.getElementById('beta-login-link'); // ✅ Get the beta login link element
 
-    // DOM Elements (Admin Portal - Add new lists)
+    const betaCodeInput = document.getElementById('beta-code');
+
+
+    const betaLoginLink = document.getElementById('beta-login-link');
+
+
     const bugReportsList = document.getElementById('bug-reports-list');
     const featureRequestsList = document.getElementById('feature-requests-list');
     const userRatingsList = document.getElementById('user-ratings-list');
-    const viewWebsiteBtn = document.getElementById('view-website-btn'); // ✅ Get the "View Website" button
+    const viewWebsiteBtn = document.getElementById('view-website-btn');
 
-    // Check for existing session
+
     const checkExistingSession = () => {
         const savedSession = localStorage.getItem('betaUserSession');
         if (savedSession) {
             try {
                 const session = JSON.parse(savedSession);
                 if (session && session.email && session.betaCode && session.expiry > Date.now()) {
-                    // Sign in anonymously first to ensure authentication before validation
+
                     signInAnonymously(auth).then(() => {
-                        // Session is still valid
+
                         validateBetaCode(session.betaCode, session.email)
                             .then(valid => {
                                 if (valid) {
                                     signInUser(session.email, session.betaCode);
                                 } else {
-                                    // Session is no longer valid
+
                                     localStorage.removeItem('betaUserSession');
                                 }
                             })
@@ -87,18 +87,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    
-    // Initialize Auth UI
+
+
     const initAuth = () => {
-        // Open login overlay when login link is clicked
+
         if (loginLink) {
             loginLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 authOverlay.classList.add('active');
             });
         }
-        
-        // Close auth overlay
+
+
         closeAuthBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 if (authOverlay) {
@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        
-        // Close auth and redirect to signup
+
+
         closeAuthRedirects.forEach(link => {
             link.addEventListener('click', (e) => {
                 authOverlay.classList.remove('active');
@@ -125,24 +125,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        
-        // Admin Login Switcher Link Event Listener
+
+
         if (adminLoginLink) {
             adminLoginLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 toggleAdminLoginMode();
             });
         }
-        
-        // Beta Login Link Event Listener
+
+
         if (betaLoginLink) {
             betaLoginLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                toggleAdminLoginMode(); // Call toggleAdminLoginMode to switch back
+                toggleAdminLoginMode();
             });
         }
-        
-        // Login with beta code (Modified to handle both beta code and admin login)
+
+
         if (loginForm) {
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const email = document.getElementById('login-email').value.trim();
 
                 if (isAdminLoginMode) {
-                    // **Admin Login Flow**
+
                     const password = document.getElementById('login-password').value.trim();
 
                     adminLoginMessage.textContent = 'Admin Logging in...';
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminLoginMessage.textContent = 'Admin login successful!';
                         adminLoginMessage.className = 'form-message success';
                         authOverlay.classList.remove('active');
-                        signInUser(email, null); // Call signInUser for admin login, betaCode is null
+                        signInUser(email, null);
                         showCustomAlert('Admin login successful!', 'success');
                     } catch (error) {
                         console.error("Admin login error:", error);
@@ -170,14 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         showCustomAlert('Admin login failed. Check credentials and console. Error: ' + error.message, 'error');
                     }
                 } else {
-                    // **Beta Code Login Flow with Anonymous Auth**
+
                     const betaCode = document.getElementById('beta-code').value.trim();
-                    
-                    // Show loading state
+
+
                     showLoginError("Validating beta code...");
-                    
+
                     try {
-                        // Sign in anonymously first to ensure database rules allow access
+
                         try {
                             await signInAnonymously(auth);
                         } catch (authError) {
@@ -185,19 +185,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             showLoginError("Authentication failed. Please try again later.");
                             return;
                         }
-                        
-                        // Now validate the beta code
+
+
                         try {
                             const isValid = await validateBetaCode(betaCode, email);
                             if (isValid) {
                                 signInUser(email, betaCode);
                                 authOverlay.classList.remove('active');
-                                
-                                // Save session for 30 days
+
+
                                 const session = {
                                     email: email,
                                     betaCode: betaCode,
-                                    expiry: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 days
+                                    expiry: Date.now() + (30 * 24 * 60 * 60 * 1000)
                                 };
                                 localStorage.setItem('betaUserSession', JSON.stringify(session));
                                 showCustomAlert('Login successful!', 'success');
@@ -215,25 +215,102 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
-        // Login links in feedback section
+
+
         document.querySelectorAll('.login-link').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 authOverlay.classList.add('active');
             });
         });
-        
-        // Initialize auth state
+
+
         checkExistingSession();
     };
-    
-    // Function to toggle admin login mode (Modified to show/hide beta login link)
+
+    const initDownload = () => {
+        if (secureDownloadLink) {
+            secureDownloadLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+
+                if (!currentUser) {
+                    showCustomAlert('You must be logged in to download the beta.', 'error');
+                    return;
+                }
+
+                showCustomAlert('Preparing download, please wait...', 'info');
+
+                try {
+
+                    const base64String = await fetchBetaDownloadBase64('8ball-playdate');
+
+                    if (!base64String) {
+                        showCustomAlert('Download data not found.', 'error');
+                        return;
+                    }
+
+
+                    const byteCharacters = atob(base64String);
+                    const byteArrays = [];
+
+                    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                        const slice = byteCharacters.slice(offset, offset + 512);
+
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+
+                        const byteArray = new Uint8Array(byteNumbers);
+                        byteArrays.push(byteArray);
+                    }
+
+                    const blob = new Blob(byteArrays, { type: 'application/octet-stream' });
+
+
+                    const url = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = '8ball.pdx.zip';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    URL.revokeObjectURL(url);
+
+                    showCustomAlert('Download started!', 'success');
+
+                } catch (error) {
+                    console.error('Download error:', error);
+                    showCustomAlert('Error preparing download. Please try again later.', 'error');
+                }
+            });
+        }
+    };
+
+    const fetchBetaDownloadBase64 = async (downloadId) => {
+        try {
+            const dbRef = ref(database);
+            const snapshot = await get(child(dbRef, `betaDownloads/${downloadId}`));
+
+            if (snapshot.exists()) {
+                return snapshot.val().base64String;
+            } else {
+                console.warn('Download data not found in Firebase for ID:', downloadId);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching download data from Firebase:', error);
+            throw error;
+        }
+    };
+
+
     const toggleAdminLoginMode = () => {
         isAdminLoginMode = !isAdminLoginMode;
 
         if (isAdminLoginMode) {
-            // Switch to Admin Login Mode
+
             loginSectionTitle.textContent = 'Admin Login';
             loginSectionInstructions.textContent = 'Enter your admin email and password.';
             betaCodeGroup.classList.add('hidden');
@@ -241,10 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
             loginSubmitButton.textContent = 'Admin Log In';
             signupLinkAuthMessage.classList.add('hidden');
             betaCodeInput.removeAttribute('required');
-            betaLoginLink.classList.remove('hidden'); // ✅ Show "Back to Beta Login" link
-            adminLoginLink.classList.add('hidden'); // ✅ Hide "Admin Login" link to prevent double-switching
+            betaLoginLink.classList.remove('hidden');
+            adminLoginLink.classList.add('hidden');
         } else {
-            // Switch back to Beta Code Login Mode (Default)
+
             loginSectionTitle.textContent = 'Log In to Beta Access';
             loginSectionInstructions.textContent = 'Enter your beta code to access test builds and submit feedback.';
             betaCodeGroup.classList.remove('hidden');
@@ -252,33 +329,33 @@ document.addEventListener('DOMContentLoaded', () => {
             loginSubmitButton.textContent = 'Log In';
             signupLinkAuthMessage.classList.remove('hidden');
             betaCodeInput.setAttribute('required', '');
-            betaLoginLink.classList.add('hidden'); // ✅ Hide "Back to Beta Login" link
-            adminLoginLink.classList.remove('hidden'); // ✅ Show "Admin Login" link
+            betaLoginLink.classList.add('hidden');
+            adminLoginLink.classList.remove('hidden');
         }
     };
-    
-    // Show login error
+
+
     const showLoginError = (message) => {
         const errorEl = document.createElement('div');
         errorEl.className = 'login-error';
         errorEl.textContent = message;
-        
-        // Remove any existing error message
+
+
         const existingError = loginForm.querySelector('.login-error');
         if (existingError) {
             existingError.remove();
         }
-        
-        // Insert before the submit button
+
+
         loginForm.insertBefore(errorEl, loginForm.querySelector('button[type="submit"]'));
     };
-    
-    // Validate beta code against database
+
+
     const validateBetaCode = async (code, email) => {
         try {
-            // Ensure user is authenticated before accessing the database
+
             if (!auth.currentUser) {
-                // Sign in anonymously first
+
                 try {
                     await signInAnonymously(auth);
                 } catch (authError) {
@@ -286,45 +363,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("Authentication failed. Please try again.");
                 }
             }
-            
-            // Get the beta codes from the database
+
+
             const dbRef = ref(database);
             const snapshot = await get(child(dbRef, 'betaCodes'));
-            
+
             if (snapshot.exists()) {
                 const betaCodes = snapshot.val();
-                
-                // Check if the code exists and is associated with the email
+
+
                 for (const key in betaCodes) {
                     const betaCode = betaCodes[key];
                     if (betaCode.code === code) {
-                        // If the code matches but no email is associated, or email matches
+
                         if (!betaCode.email || betaCode.email === email) {
                             validatedBetaCode = {
                                 id: key,
                                 ...betaCode
                             };
-                            
-                            // If no email was associated, associate it now
+
+
                             if (!betaCode.email) {
                                 await set(ref(database, `betaCodes/${key}/email`), email);
                                 validatedBetaCode.email = email;
                             }
-                            
+
                             return true;
                         }
                     }
                 }
             }
-            
+
             return false;
         } catch (error) {
             console.error("Error validating beta code:", error);
             throw error;
         }
     };
-    
-    // Sign in user (Modified to handle admin detection)
+
+
     const signInUser = (email, betaCode) => {
         currentUser = {
             email: email,
@@ -335,16 +412,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminEmails = ['owen@owen.uno'];
         if (adminEmails.includes(email)) {
             currentUser.isAdmin = true;
-            showAdminDashboard(); // Function to show admin dashboard
+            showAdminDashboard();
         } else {
             currentUser.isAdmin = false;
         }
 
-        // Update UI for logged in state
+
         updateAuthUI(true, currentUser.isAdmin);
     };
 
-    // Function to show admin dashboard (Enhanced to load applications and feedback data)
+
     const showAdminDashboard = () => {
         adminPortal.classList.remove('initially-hidden');
         adminPortal.classList.remove('hidden');
@@ -358,7 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createCloseButton();
         updateAuthUI(true, currentUser.isAdmin);
 
-        // Add this CSS to hide the admin dashboard actions section
+
         const adminStyle = document.createElement('style');
         adminStyle.textContent = `
             .admin-dashboard-actions {
@@ -368,15 +445,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(adminStyle);
     };
 
-    // Function to load beta applications from Firebase
+
     const loadBetaApplications = () => {
-        applicationsList.innerHTML = '<p>Loading beta applications...</p>'; // Initial loading message
+        applicationsList.innerHTML = '<p>Loading beta applications...</p>';
 
         const applicationsRef = ref(database, 'applications');
 
         onValue(applicationsRef, (snapshot) => {
             if (snapshot.exists()) {
-                applicationsList.innerHTML = ''; // Clear loading message
+                applicationsList.innerHTML = '';
                 const applicationsData = snapshot.val();
 
                 Object.keys(applicationsData).forEach(appId => {
@@ -396,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     applicationsList.appendChild(appCard);
                 });
-                // Add event listeners for Approve/Deny buttons after they are created (important!)
+
                 attachActionButtonsListeners();
             } else {
                 applicationsList.innerHTML = '<p>No beta applications yet.</p>';
@@ -407,9 +484,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to attach event listeners to Approve/Deny buttons (after they are dynamically added)
+
     const attachActionButtonsListeners = () => {
-        applicationsList.addEventListener('click', function(event) {
+        applicationsList.addEventListener('click', function (event) {
             if (event.target.classList.contains('approve-btn')) {
                 const appId = event.target.dataset.appId;
                 handleApproveApplication(appId);
@@ -420,19 +497,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to handle application approval
+
     const handleApproveApplication = async (appId) => {
-        // First, verify the current user is authenticated and is an admin
+
         const currentAuthUser = auth.currentUser;
         if (!currentAuthUser) {
             showCustomAlert('You must be logged in as an admin to approve applications. Please sign in again.', 'error');
             return;
         }
 
-        // Check if user is admin by checking admins node
+
         const adminsRef = ref(database, `admins/${currentAuthUser.uid}`);
         const adminSnapshot = await get(adminsRef);
-        
+
         if (!adminSnapshot.exists()) {
             showCustomAlert('You do not have admin permissions to approve applications.', 'error');
             return;
@@ -444,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showCustomAlert('Application not found.', 'error');
             return;
         }
-        
+
         const appData = snapshot.val();
         const userEmail = appData.email;
 
@@ -452,13 +529,13 @@ document.addEventListener('DOMContentLoaded', () => {
         adminLoginMessage.className = 'form-message';
 
         try {
-            // Generate a beta code for this user
+
             const newBetaCode = generateBetaCode();
-            
-            // First create the beta code - this should work with current rules
+
+
             const betaCodesRef = ref(database, 'betaCodes');
             const newBetaCodeRef = child(betaCodesRef, `${Date.now()}`);
-            
+
             await set(newBetaCodeRef, {
                 code: newBetaCode,
                 email: userEmail,
@@ -467,17 +544,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 approved: true
             });
 
-            // Now update the application status
+
             const applicationStatusRef = ref(database, `applications/${appId}/status`);
             await set(applicationStatusRef, 'approved');
-            
-            // Also store the beta code in the application
+
+
             const betaCodeRef = ref(database, `applications/${appId}/betaCode`);
             await set(betaCodeRef, newBetaCode);
 
             adminLoginMessage.textContent = `Application approved! Beta code ${newBetaCode} created for ${userEmail}.`;
             adminLoginMessage.className = 'form-message success';
-            loadBetaApplications(); // Refresh application list
+            loadBetaApplications();
             showCustomAlert(`Application approved! User can now log in with their email and beta code: ${newBetaCode}`, 'success');
 
         } catch (error) {
@@ -488,10 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to generate a random beta code
+
     const generateBetaCode = () => {
-        // Generate a 8-character code with letters and numbers
-        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar-looking characters
+
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let result = '';
         for (let i = 0; i < 8; i++) {
             result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -499,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return result;
     };
 
-    // Function to handle application denial
+
     const handleDenyApplication = async (appId) => {
         const applicationsRef = ref(database, `applications/${appId}`);
         const snapshot = await get(applicationsRef);
@@ -532,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Sign out user
+
     const signOutUser = async () => {
         try {
             await signOut(auth);
@@ -551,10 +628,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Update the UI based on authentication state (Modified to handle admin UI)
+
     const updateAuthUI = (isLoggedIn, isAdmin = false) => {
         if (isLoggedIn && currentUser) {
-            // Update auth status in nav
+
             authStatus.classList.add('logged-in');
             if (isAdmin) {
                 loginLink.textContent = `Admin`;
@@ -566,14 +643,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 authStatus.classList.remove('admin-mode-header');
             }
 
-            // Show feedback forms and hide login prompt
+
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.add('hidden');
             if (feedbackForms) feedbackForms.classList.remove('hidden');
 
-            // Show download section if it exists
+
             if (downloadSection) downloadSection.classList.remove('hidden');
 
-            // Create dropdown menu with hover effect
+
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown-menu';
             dropdown.innerHTML = `
@@ -584,14 +661,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </ul>
             `;
 
-            // Only add dropdown if it doesn't already exist
+
             if (!authStatus.querySelector('.dropdown-menu')) {
                 authStatus.appendChild(dropdown);
-                
-                // Sign out button event listener
+
+
                 document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
-                
-                // Admin portal link event listener
+
+
                 if (isAdmin) {
                     document.getElementById('admin-portal-link-dropdown').addEventListener('click', (e) => {
                         e.preventDefault();
@@ -600,56 +677,56 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminPortal.classList.add('active');
                     });
                 }
-                
-                // Resign from testing button event listener
+
+
                 if (!isAdmin && document.getElementById('resign-btn')) {
                     document.getElementById('resign-btn').addEventListener('click', handleResignFromTesting);
                 }
             }
         } else {
-            // Update auth status in nav for logged out state
+
             authStatus.classList.remove('logged-in');
             loginLink.textContent = 'Log In';
             loginLink.href = '#login';
             authStatus.classList.remove('admin-mode-header');
-            
-            // Hide feedback forms and show login prompt
+
+
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.remove('hidden');
             if (feedbackForms) feedbackForms.classList.add('hidden');
-            
-            // Hide download section
+
+
             if (downloadSection) downloadSection.classList.add('hidden');
-            
-            // Remove dropdown if it exists
+
+
             const dropdown = authStatus.querySelector('.dropdown-menu');
             if (dropdown) dropdown.remove();
         }
     };
-    
-    // Initialize feedback forms
+
+
     const initFeedbackForms = () => {
-        // Make feedback options expandable
+
         feedbackOptions.forEach(option => {
             const heading = option.querySelector('h3');
             heading.addEventListener('click', () => {
-                // Close any other active options
+
                 feedbackOptions.forEach(otherOption => {
                     if (otherOption !== option && otherOption.classList.contains('active')) {
                         otherOption.classList.remove('active');
                     }
                 });
-                
-                // Toggle this option
+
+
                 option.classList.toggle('active');
             });
         });
-        
-        // Handle bug report submission
+
+
         if (bugReportForm) {
             bugReportForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (!currentUser) return;
-                
+
                 const bugData = {
                     title: bugReportForm.querySelector('#bug-title').value,
                     details: bugReportForm.querySelector('#bug-details').value,
@@ -659,18 +736,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     timestamp: new Date().toISOString(),
                     status: 'new'
                 };
-                
-                // Save to Firebase
+
+
                 submitFeedback('bugs', bugData, bugReportForm);
             });
         }
-        
-        // Handle feature suggestion submission
+
+
         if (featureForm) {
             featureForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (!currentUser) return;
-                
+
                 const featureData = {
                     title: featureForm.querySelector('#feature-title').value,
                     details: featureForm.querySelector('#feature-details').value,
@@ -679,18 +756,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     timestamp: new Date().toISOString(),
                     status: 'under-review'
                 };
-                
-                // Save to Firebase
+
+
                 submitFeedback('features', featureData, featureForm);
             });
         }
-        
-        // Handle experience feedback submission
+
+
         if (experienceForm) {
             experienceForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 if (!currentUser) return;
-                
+
                 const ratingInputs = experienceForm.querySelectorAll('input[name="rating"]');
                 let rating = 0;
                 ratingInputs.forEach(input => {
@@ -698,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         rating = parseInt(input.value);
                     }
                 });
-                
+
                 const experienceData = {
                     details: experienceForm.querySelector('#experience-details').value,
                     rating: rating,
@@ -706,32 +783,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     project: currentUser.project,
                     timestamp: new Date().toISOString()
                 };
-                
-                // Save to Firebase
+
+
                 submitFeedback('experiences', experienceData, experienceForm);
             });
         }
     };
-    
-    // Submit feedback to Firebase
+
+
     const submitFeedback = (feedbackType, data, form) => {
         try {
             const feedbackListRef = ref(database, `feedback/${feedbackType}`);
             const newFeedbackRef = child(feedbackListRef, `${Date.now()}`);
-            
+
             set(newFeedbackRef, data)
                 .then(() => {
                     form.reset();
-                    
+
                     const successMsg = document.createElement('div');
                     successMsg.className = 'feedback-success';
                     successMsg.textContent = 'Thank you for your feedback!';
-                    
+
                     const existingMsg = form.querySelector('.feedback-success');
                     if (existingMsg) existingMsg.remove();
-                    
+
                     form.appendChild(successMsg);
-                    
+
                     setTimeout(() => {
                         successMsg.remove();
                         const option = form.closest('.feedback-option');
@@ -747,13 +824,13 @@ document.addEventListener('DOMContentLoaded', () => {
             showCustomAlert("There was an error submitting your feedback. Please try again.", "error");
         }
     };
-    
-    // Beta Application Form (Modified for Email Verification and App Check)
+
+
     if (betaSignupForm) {
         betaSignupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Get form data
+
             const formData = new FormData(betaSignupForm);
             const formValues = Object.fromEntries(formData.entries());
 
@@ -761,14 +838,14 @@ document.addEventListener('DOMContentLoaded', () => {
             signupMessage.className = 'form-message';
 
             try {
-                // **2. Create User with Email and Password (for verification)**
+
                 const userCredential = await createUserWithEmailAndPassword(auth, formValues.email, generateRandomPassword());
                 const user = userCredential.user;
 
-                // **3. Send Email Verification**
+
                 await sendEmailVerification(user);
 
-                // **4. Save Application Data to Firebase**
+
                 const applicationsRef = ref(database, 'applications');
                 const newApplicationRef = child(applicationsRef, `${Date.now()}`);
 
@@ -778,17 +855,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     playdateOwner: formValues['playdate-owner'],
                     experience: formValues.experience || '',
                     timestamp: new Date().toISOString(),
-                    status: 'pending', // Application is pending admin approval
+                    status: 'pending',
                     project: '8ball',
                 };
 
                 await set(newApplicationRef, applicationData);
 
-                // **5. Show Success Message**
+
                 signupMessage.textContent = 'Application submitted! Please check your email to verify your address. Your application is pending admin approval.';
                 signupMessage.className = 'form-message success';
 
-                // Clear the form
+
                 betaSignupForm.reset();
 
             } catch (error) {
@@ -803,18 +880,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Function to generate a random password (temporary for email verification)
+
     function generateRandomPassword() {
         return Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
     }
-    
-    // Notify Me functionality for coming soon projects
+
+
     const notifyButtons = document.querySelectorAll('a[href="#notify-me"]');
     notifyButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Create a modal for email collection
+
+
             const modal = document.createElement('div');
             modal.className = 'notify-modal';
             modal.innerHTML = `
@@ -831,10 +908,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </form>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
-            // Add CSS for the modal
+
+
             const style = document.createElement('style');
             style.textContent = `
                 .notify-modal {
@@ -879,15 +956,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     transform: translateY(0);
                 }
             `;
-            
+
             document.head.appendChild(style);
-            
-            // Show the modal with animation
+
+
             setTimeout(() => {
                 modal.classList.add('modal-active');
             }, 10);
-            
-            // Close modal functionality
+
+
             const closeModal = document.querySelector('.close-modal');
             closeModal.addEventListener('click', () => {
                 modal.classList.remove('modal-active');
@@ -895,34 +972,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     modal.remove();
                 }, 300);
             });
-            
-            // Notify form submission
+
+
             const notifyForm = document.getElementById('notify-form');
             notifyForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const email = document.getElementById('notify-email').value;
-                
-                // Save notification request to Firebase
+
+
                 try {
                     const notificationsRef = ref(database, 'notifications');
                     const newNotificationRef = child(notificationsRef, `${Date.now()}`);
-                    
+
                     const notificationData = {
                         email: email,
                         timestamp: new Date().toISOString(),
-                        project: 'mystery-macos' // Hardcoded for now, but could be dynamic
+                        project: 'mystery-macos'
                     };
-                    
+
                     set(newNotificationRef, notificationData)
                         .then(() => {
-                            // Update the modal content
+
                             const modalContent = document.querySelector('.modal-content');
                             modalContent.innerHTML = `
                                 <h3>Thanks!</h3>
                                 <p>We'll email <strong>${email}</strong> when this beta is ready to test.</p>
                                 <button class="btn-primary close-modal-btn">Close</button>
                             `;
-                            
+
                             const closeBtn = document.querySelector('.close-modal-btn');
                             closeBtn.addEventListener('click', () => {
                                 modal.classList.remove('modal-active');
@@ -942,8 +1019,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
-    
-    // Fun easter egg - clicking the logo
+
+
     const logo = document.querySelector('.logo a');
     if (logo) {
         let clickCount = 0;
@@ -951,12 +1028,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.ctrlKey) {
                 e.preventDefault();
                 clickCount++;
-                
+
                 if (clickCount >= 5) {
-                    // After 5 ctrl+clicks, trigger the easter egg
+
                     document.body.classList.add('party-mode');
-                    
-                    // Add some fun styles
+
+
                     const partyStyle = document.createElement('style');
                     partyStyle.textContent = `
                         @keyframes partyColors {
@@ -975,10 +1052,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             animation: shake 0.5s infinite;
                         }
                     `;
-                    
+
                     document.head.appendChild(partyStyle);
-                    
-                    // Reset after 5 seconds
+
+
                     setTimeout(() => {
                         document.body.classList.remove('party-mode');
                         clickCount = 0;
@@ -987,20 +1064,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Smooth scrolling for anchor links
+
+
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             if (this.getAttribute('href') === '#notify-me' ||
                 this.getAttribute('href') === '#login' ||
                 this.classList.contains('close-auth-redirect')) {
-                return; // Skip processing, handled by other handlers
+                return;
             }
 
             e.preventDefault();
 
             const targetHref = this.getAttribute('href');
-            if (targetHref && targetHref !== "#" && targetHref !== '') { // ✅ Check for empty or just '#' href
+            if (targetHref && targetHref !== "#" && targetHref !== '') {
                 const targetId = targetHref;
                 const targetElement = document.querySelector(targetId);
 
@@ -1015,8 +1092,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-    
-    // Admin Portal Elements
+
+
     const adminPortal = document.getElementById('admin-portal');
     const adminLoginForm = document.getElementById('admin-login-form');
     const adminLoginMessage = document.getElementById('admin-login-message');
@@ -1024,12 +1101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const applicationsList = document.getElementById('applications-list');
     const adminSignOutBtn = document.getElementById('admin-sign-out-btn');
 
-    // Admin Portal Functionality
-    const initAdminPortal = () => {
-        // Check if admin is already logged in (session persistence - optional for now)
-        // For simplicity, we'll just show the login form initially
 
-        // Admin Login Form Submission
+    const initAdminPortal = () => {
+
+
+
+
         if (adminLoginForm) {
             adminLoginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -1044,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     adminLoginForm.classList.add('hidden');
                     adminDashboard.classList.remove('hidden');
                     adminLoginMessage.textContent = '';
-                    // loadBetaApplications();
+
                     showCustomAlert('Admin login successful!', 'success');
                 } catch (error) {
                     console.error("Admin login error:", error);
@@ -1055,7 +1132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Admin Sign Out
+
         if (adminSignOutBtn) {
             adminSignOutBtn.addEventListener('click', async () => {
                 try {
@@ -1073,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // "View Website" Button Event Listener
+
         if (viewWebsiteBtn) {
             viewWebsiteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1085,8 +1162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    
-    // Function to load bug reports from Firebase
+
+
     const loadBugReports = () => {
         bugReportsList.innerHTML = '<p>Loading bug reports...</p>';
         const bugReportsRef = ref(database, 'feedback/bugs');
@@ -1096,7 +1173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const reportsData = snapshot.val();
                 Object.keys(reportsData).forEach(reportId => {
                     const report = reportsData[reportId];
-                    const reportCard = createFeedbackCard(report, 'bug'); // Re-use or create a card function
+                    const reportCard = createFeedbackCard(report, 'bug');
                     bugReportsList.appendChild(reportCard);
                 });
             } else {
@@ -1108,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to load feature requests from Firebase
+
     const loadFeatureRequests = () => {
         featureRequestsList.innerHTML = '<p>Loading feature requests...</p>';
         const featureRequestsRef = ref(database, 'feedback/features');
@@ -1118,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const requestsData = snapshot.val();
                 Object.keys(requestsData).forEach(requestId => {
                     const request = requestsData[requestId];
-                    const requestCard = createFeedbackCard(request, 'feature'); // Re-use or create a card function
+                    const requestCard = createFeedbackCard(request, 'feature');
                     featureRequestsList.appendChild(requestCard);
                 });
             } else {
@@ -1130,7 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Function to load user ratings from Firebase
+
     const loadUserRatings = () => {
         userRatingsList.innerHTML = '<p>Loading user ratings...</p>';
         const userRatingsRef = ref(database, 'feedback/experiences');
@@ -1140,7 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ratingsData = snapshot.val();
                 Object.keys(ratingsData).forEach(ratingId => {
                     const rating = ratingsData[ratingId];
-                    const ratingCard = createFeedbackCard(rating, 'rating'); // Re-use or create a card function
+                    const ratingCard = createFeedbackCard(rating, 'rating');
                     userRatingsList.appendChild(ratingCard);
                 });
             } else {
@@ -1152,10 +1229,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Helper function to create a feedback card (reusable for bugs, features, ratings)
+
     const createFeedbackCard = (feedback, type) => {
         const card = document.createElement('div');
-        card.className = 'feedback-card'; // You might want to style this in CSS
+        card.className = 'feedback-card';
         let cardContent = `
             <h4>${feedback.title || (type === 'rating' ? 'User Rating' : 'No Title')}</h4>
             <p>Submitted by: ${feedback.submittedBy}</p>
@@ -1170,48 +1247,49 @@ document.addEventListener('DOMContentLoaded', () => {
         card.innerHTML = cardContent;
         return card;
     };
-    
-    // Initialize everything
+
+
     initAuth();
+    initDownload();
     initFeedbackForms();
 
-    // Add this custom alert function to script.js
+
     const showCustomAlert = (message, type = 'info') => {
-        // Check if the custom alert container exists
+
         let alertContainer = document.querySelector('.custom-alert');
-        
-        // If not, create it
+
+
         if (!alertContainer) {
             alertContainer = document.createElement('div');
             alertContainer.className = 'custom-alert';
             document.body.appendChild(alertContainer);
         }
-        
-        // Set the alert content
+
+
         alertContainer.innerHTML = `
             <div class="alert-content">
                 <p>${message}</p>
                 <button class="close-alert">&times;</button>
             </div>
         `;
-        
-        // Set the alert type
+
+
         alertContainer.className = `custom-alert ${type}`;
-        
-        // Show the alert
+
+
         setTimeout(() => {
             alertContainer.classList.add('active');
         }, 100);
-        
-        // Hide the alert after 5 seconds
+
+
         const hideTimeout = setTimeout(() => {
             alertContainer.classList.remove('active');
             setTimeout(() => {
                 alertContainer.remove();
             }, 300);
         }, 5000);
-        
-        // Allow manual closing of the alert
+
+
         const closeBtn = alertContainer.querySelector('.close-alert');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
@@ -1224,32 +1302,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Add resign from testing functionality
+
     const handleResignFromTesting = () => {
         if (!currentUser || !currentUser.email) {
             showCustomAlert('You must be logged in to resign from testing.', 'error');
             return;
         }
-        
-        // Ask for confirmation
+
+
         const confirmResign = confirm('Are you sure you want to resign from beta testing? This will notify the admin and you will lose access to beta builds.');
-        
+
         if (confirmResign) {
             try {
-                // Add to resignations in database
+
                 const resignationsRef = ref(database, 'resignations');
                 const newResignationRef = child(resignationsRef, `${Date.now()}`);
-                
+
                 const resignationData = {
                     email: currentUser.email,
                     betaCode: currentUser.betaCode,
                     timestamp: new Date().toISOString(),
                     project: currentUser.project || 'unknown'
                 };
-                
+
                 set(newResignationRef, resignationData)
                     .then(() => {
-                        // Sign out the user
+
                         signOutUser();
                         showCustomAlert('You have successfully resigned from beta testing. Thank you for your participation!', 'info');
                     })
@@ -1264,19 +1342,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to load resignations for admin portal
+
     const loadResignations = () => {
         const resignationsList = document.getElementById('resignations-list');
         if (!resignationsList) return;
-        
+
         resignationsList.innerHTML = '<p>Loading resignation requests...</p>';
         const resignationsRef = ref(database, 'resignations');
-        
+
         onValue(resignationsRef, (snapshot) => {
             if (snapshot.exists()) {
                 resignationsList.innerHTML = '';
                 const resignationsData = snapshot.val();
-                
+
                 Object.keys(resignationsData).forEach(resignId => {
                     const resign = resignationsData[resignId];
                     const resignCard = document.createElement('div');
@@ -1298,24 +1376,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Better alternative: modify the handleApproveApplication function to include custom confirm
+
     const createCloseButton = () => {
-        // Only create if it doesn't exist already
+
         if (document.querySelector('.close-admin')) return;
-        
+
         const adminContainer = document.querySelector('.admin-container');
         if (adminContainer) {
             const closeButton = document.createElement('span');
             closeButton.className = 'close-admin';
             closeButton.innerHTML = '&times;';
-            
+
             closeButton.addEventListener('click', () => {
                 adminPortal.classList.remove('active');
                 adminPortal.classList.add('hidden');
                 adminPortal.classList.add('initially-hidden');
                 showCustomAlert('Admin Portal hidden. Click "Admin" in the header to return.', 'info');
             });
-            
+
             adminContainer.insertBefore(closeButton, adminContainer.firstChild.nextSibling);
         }
     };
