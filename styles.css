@@ -306,6 +306,9 @@ nav a:hover::after {
 .feedback-option {
     padding: 1.5rem;
     transition: var(--transition);
+}
+
+.feedback-option h3 {
     cursor: var(--cursor-interactive);
 }
 
@@ -407,6 +410,37 @@ nav a:hover::after {
     font-size: 1.1rem;
     padding: 0.8rem 2rem;
     margin-bottom: 2rem;
+}
+
+/* Download button states */
+.download-link.loading {
+    background-color: #ccc;
+    color: #666;
+    pointer-events: none;
+    position: relative;
+}
+
+.download-link.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: calc(50% - 10px);
+    right: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+.download-link.error {
+    background-color: var(--secondary-color);
+    color: white;
+    pointer-events: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 #step-title {
@@ -833,7 +867,6 @@ form .btn-primary {
     box-shadow: var(--box-shadow);
     transition: var(--transition);
     padding: 1.5rem;
-    cursor: var(--cursor-interactive);
     position: relative;
     overflow: hidden;
 }
@@ -1578,11 +1611,6 @@ nav ul {
 /* Application buttons */
 .application-actions .approve-btn, .application-actions .deny-btn {
     cursor: var(--cursor-button);
-}
-
-/* Beta card hover effect - make sure to use the interactive cursor */
-.beta-card:hover, .download-card:hover, .feedback-option:hover {
-    cursor: var(--cursor-interactive);
 }
 
 /* Login and signup form buttons */

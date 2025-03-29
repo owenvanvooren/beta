@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackLoginPrompt = document.getElementById('feedback-login-prompt');
     const feedbackForms = document.getElementById('feedback-forms');
     const downloadSection = document.getElementById('download');
+    const downloadLinks = document.querySelectorAll('.download-link');
     const feedbackOptions = document.querySelectorAll('.feedback-option');
     const bugReportForm = document.getElementById('bug-report-form');
     const featureForm = document.getElementById('feature-form');
@@ -342,6 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update UI for logged in state
         updateAuthUI(true, currentUser.isAdmin);
+        
+        // Setup secure download links
+        setupSecureDownloads();
     };
 
     // Function to show admin dashboard (Enhanced to load applications and feedback data)
@@ -1318,5 +1322,65 @@ document.addEventListener('DOMContentLoaded', () => {
             
             adminContainer.insertBefore(closeButton, adminContainer.firstChild.nextSibling);
         }
+    };
+
+    // Function to setup secure download links
+    const setupSecureDownloads = () => {
+        if (!currentUser) return;
+        
+        downloadLinks.forEach(link => {
+            link.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const version = link.getAttribute('data-version');
+                const fileName = link.getAttribute('href').split('/').pop();
+                
+                try {
+                    // Show loading indicator
+                    link.textContent = 'Preparing Download...';
+                    link.classList.add('loading');
+                    
+                    // Generate a short-lived secure download URL with the beta code as authentication
+                    // Use a sanitized email key for Firebase path (replace dots and other special chars)
+                    const sanitizedEmail = currentUser.email.replace(/\./g, ',').replace(/[\#\$\[\]]/g, '_');
+                    const secureUrlRef = ref(database, `secureDownloads/${sanitizedEmail}`);
+                    const timestamp = Date.now();
+                    const expiry = timestamp + (5 * 60 * 1000); // URL expires in 5 minutes
+                    
+                    await set(secureUrlRef, {
+                        timestamp: timestamp,
+                        expiry: expiry,
+                        fileName: fileName,
+                        version: version,
+                        betaCode: currentUser.betaCode,
+                        originalEmail: currentUser.email // Store original email for reference
+                    });
+                    
+                    // Construct the secure download URL that the server will validate
+                    const secureDownloadUrl = `https://cdn.owen.uno/download?email=${encodeURIComponent(currentUser.email)}&timestamp=${timestamp}&version=${version}`;
+                    
+                    // Start the download
+                    window.location.href = secureDownloadUrl;
+                    
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        link.textContent = 'Download .pdx';
+                        link.classList.remove('loading');
+                    }, 3000);
+                    
+                } catch (error) {
+                    console.error("Error generating secure download link:", error);
+                    link.textContent = 'Download Failed';
+                    link.classList.add('error');
+                    
+                    setTimeout(() => {
+                        link.textContent = 'Try Again';
+                        link.classList.remove('error');
+                    }, 3000);
+                    
+                    showCustomAlert("There was an error preparing your download. Please try again.", "error");
+                }
+            });
+        });
     };
 }); 

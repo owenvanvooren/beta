@@ -1,0 +1,43 @@
+{
+  "name": "@teenagetech/cdn",
+  "version": "1.0.0",
+  "description": "Secure CDN for beta builds",
+  "main": "cdn-server.js",
+  "private": true,
+  "scripts": {
+    "start": "node cdn-server.js",
+    "dev": "nodemon cdn-server.js",
+    "local": "node run-local.js",
+    "debug": "ENABLE_DEBUG=true node run-local.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teenagetech/cdn.git"
+  },
+  "keywords": [
+    "cdn",
+    "playdate",
+    "beta"
+  ],
+  "author": "Owen Van Vooren",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/teenagetech/cdn/issues"
+  },
+  "homepage": "https://github.com/teenagetech/cdn#readme",
+  "dependencies": {
+    "@octokit/rest": "^18.12.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.8.0",
+    "fs-extra": "^11.1.1",
+    "http-proxy-middleware": "^2.0.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "publishConfig": {
+    "@teenagetech:registry": "https://npm.pkg.github.com"
+  }
+}

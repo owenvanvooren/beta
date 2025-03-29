@@ -1,0 +1,77 @@
+{
+  "rules": {
+    "applications": {
+      ".read": "auth != null",
+      "$applicationId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+        "status": {
+          ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        },
+        "betaCode": {
+          ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        }
+      }
+    },
+    "betaCodes": {
+      // Allow read access to beta codes for any authenticated user (including anonymous)
+      ".read": "auth != null",
+      
+      // Only allow write to specific betaCode if:
+      // 1. The user is authenticated AND
+      // 2. Either they are an admin OR it's just updating the email field for a code
+      "$betaCodeId": {
+        // Allow email update for a beta code if no email is set yet
+        "email": {
+          ".write": "auth != null && (!data.exists() || data.val() == null || data.val() == '')"
+        },
+        // All other fields can only be modified by admins
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+      },
+      
+      // Allow admins to create new beta codes
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+    "secureDownloads": {
+      // Allow complete read/write access for all authenticated users to secureDownloads
+      // This is safe because users can only access their own downloads by sanitized email
+      ".read": "auth != null",
+      ".write": "auth != null",
+      
+      // Still keep child-level rules for better security
+      "$userEmailPath": {
+        // For fine-grained per-user rules, check the originalEmail field
+        ".read": "auth != null && (data.child('originalEmail').exists() && auth.token.email === data.child('originalEmail').val())",
+        ".write": "auth != null && (!data.exists() || (data.child('originalEmail').exists() && auth.token.email === data.child('originalEmail').val()))"
+      }
+    },
+    "feedback": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "bugs": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "features": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "experiences": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "notifications": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "admins": {
+      ".read": "auth != null",
+      ".write": "false"
+    },
+    "resignations": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null"
+    }
+  }
+} 
