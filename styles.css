@@ -10,17 +10,11 @@
     --border-radius: 12px;
     --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
-
+    
     /* Custom cursor definitions */
     --cursor-default: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.4"/><circle cx="12" cy="12" r="3" fill="%235d5efa"/></svg>') 12 12, auto;
     --cursor-interactive: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="%235d5efa" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="%235d5efa"/></svg>') 12 12, pointer;
     --cursor-button: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="white" fill-opacity="0.5"/><circle cx="12" cy="12" r="4" fill="white"/></svg>') 12 12, pointer;
-
-    /* Grid background pattern */
-    --grid-size: 24px;
-    --grid-line-color: rgba(0, 0, 0, 0.04);
-    --grid-dot-color: rgba(93, 94, 250, 0.08);
-    --grid-dot-size: 1px;
 }
 
 * {
@@ -39,50 +33,23 @@ body {
     color: var(--text-color);
     background-color: var(--background-color);
     overflow-x: hidden;
-    background-image:
-        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px),
-        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
-    background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size);
-    background-position: center center;
 }
 
 /* Interactive elements */
-a,
-button,
-input[type="submit"],
-input[type="button"],
-.btn-primary,
-.btn-secondary,
-.btn-outline,
-select,
-input[type="checkbox"],
-input[type="radio"],
-label[for],
-.beta-card,
-.close-auth,
-.feedback-option h3,
-.application-actions button,
-.dropdown-menu a,
-.dropdown-menu button,
-.install-section:hover {
+a, button, input[type="submit"], input[type="button"], .btn-primary, .btn-secondary, .btn-outline, 
+select, input[type="checkbox"], input[type="radio"], label[for], .beta-card, 
+.close-auth, .feedback-option h3, .application-actions button, .dropdown-menu a, 
+.dropdown-menu button, .install-section:hover {
     cursor: var(--cursor-interactive);
 }
 
 /* Buttons and focused elements */
-.btn-primary,
-.btn-secondary,
-.btn-outline,
-button[type="submit"],
-input[type="submit"] {
+.btn-primary, .btn-secondary, .btn-outline, button[type="submit"], input[type="submit"] {
     cursor: var(--cursor-button);
 }
 
 /* Specific elements that should use the default cursor */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
+input[type="text"], input[type="email"], input[type="password"], textarea {
     cursor: text;
 }
 
@@ -103,12 +70,7 @@ a:hover {
     color: var(--secondary-color);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     line-height: 1.3;
     margin-bottom: 1rem;
@@ -153,7 +115,6 @@ p {
     margin: auto;
     text-align: left;
 }
-
 #step-list li {
     color: var(--accent-color);
     font-size: 20px;
@@ -180,11 +141,6 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
-    background-image:
-        linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-        linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px),
-        radial-gradient(var(--grid-dot-color) calc(var(--grid-dot-size) * 0.8), transparent calc(var(--grid-dot-size) * 0.8));
-    background-size: calc(var(--grid-size) * 0.8) calc(var(--grid-size) * 0.8);
 }
 
 .logo {
@@ -333,9 +289,6 @@ nav a:hover::after {
 .feedback-option {
     padding: 1.5rem;
     transition: var(--transition);
-}
-
-.feedback-option h3 {
     cursor: var(--cursor-interactive);
 }
 
@@ -358,12 +311,6 @@ nav a:hover::after {
 .download {
     background: linear-gradient(145deg, #f5f7fa 0%, #e4e8f0 100%);
     padding: 5rem 0;
-    position: relative;
-    background-image:
-        linear-gradient(rgba(93, 94, 250, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(93, 94, 250, 0.03) 1px, transparent 1px),
-        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
-    background-size: calc(var(--grid-size) * 1.2) calc(var(--grid-size) * 1.2);
 }
 
 .download h2 {
@@ -372,7 +319,7 @@ nav a:hover::after {
     margin-bottom: 1rem;
 }
 
-.download>.container>p {
+.download > .container > p {
     text-align: center;
     max-width: 700px;
     margin: 0 auto 3rem;
@@ -478,7 +425,7 @@ nav a:hover::after {
     font-weight: bold;
 }
 
-#step-list+p {
+#step-list + p {
     display: inline-block;
     background-color: #f5f5f5;
     padding: 0.4rem 1rem;
@@ -511,12 +458,12 @@ nav a:hover::after {
     transition: var(--transition);
 }
 
-.rating input:checked~label {
+.rating input:checked ~ label {
     color: var(--accent-color);
 }
 
 .rating label:hover,
-.rating label:hover~label {
+.rating label:hover ~ label {
     color: var(--accent-color);
 }
 
@@ -527,12 +474,6 @@ nav a:hover::after {
     text-align: center;
     position: relative;
     overflow: hidden;
-    background-image:
-        linear-gradient(135deg, #f5f7fa 0%, #dfe5f2 100%),
-        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px),
-        radial-gradient(var(--grid-dot-color) calc(var(--grid-dot-size) * 1.5), transparent calc(var(--grid-dot-size) * 1.5));
-    background-size: 100% 100%, calc(var(--grid-size) * 1.5) calc(var(--grid-size) * 1.5), calc(var(--grid-size) * 1.5) calc(var(--grid-size) * 1.5);
 }
 
 .hero::before {
@@ -567,9 +508,7 @@ nav a:hover::after {
 }
 
 /* Buttons */
-.btn-primary,
-.btn-secondary,
-.btn-outline {
+.btn-primary, .btn-secondary, .btn-outline {
     display: inline-block;
     padding: 0.8rem 1.8rem;
     border-radius: var(--border-radius);
@@ -618,8 +557,6 @@ nav a:hover::after {
 /* Beta Cards Section */
 .betas {
     padding: 5rem 0;
-    position: relative;
-    z-index: 1;
 }
 
 .betas h2 {
@@ -654,8 +591,7 @@ nav a:hover::after {
     height: 100%;
 }
 
-.beta-tag,
-.coming-soon-tag {
+.beta-tag, .coming-soon-tag {
     display: inline-block;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
@@ -768,16 +704,9 @@ nav a:hover::after {
 .signup {
     padding: 5rem 0;
     background-color: #f5f7fa;
-    position: relative;
-    background-image:
-        linear-gradient(rgba(93, 94, 250, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(93, 94, 250, 0.03) 1px, transparent 1px),
-        radial-gradient(var(--grid-dot-color) var(--grid-dot-size), transparent var(--grid-dot-size));
-    background-size: calc(var(--grid-size) * 1.2) calc(var(--grid-size) * 1.2);
 }
 
-.signup h2,
-.signup p {
+.signup h2, .signup p {
     text-align: center;
 }
 
@@ -804,9 +733,7 @@ label {
     font-weight: 600;
 }
 
-input,
-select,
-textarea {
+input, select, textarea {
     width: 100%;
     padding: 0.8rem;
     border: 2px solid #ddd;
@@ -817,9 +744,7 @@ textarea {
     resize: none;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:focus, select:focus, textarea:focus {
     border-color: var(--primary-color);
     outline: none;
 }
@@ -849,12 +774,11 @@ form .btn-primary {
     padding: 5rem 0;
 }
 
-.feedback h2,
-.feedback>p {
+.feedback h2, .feedback > p {
     text-align: center;
 }
 
-.feedback>p {
+.feedback > p {
     margin-bottom: 3rem;
 }
 
@@ -872,6 +796,7 @@ form .btn-primary {
     box-shadow: var(--box-shadow);
     transition: var(--transition);
     padding: 1.5rem;
+    cursor: var(--cursor-interactive);
     position: relative;
     overflow: hidden;
 }
@@ -920,15 +845,8 @@ form .btn-primary {
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Footer */
@@ -936,11 +854,6 @@ footer {
     background-color: var(--dark-color);
     color: white;
     padding: 3rem 0;
-    position: relative;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: var(--grid-size) var(--grid-size);
 }
 
 .footer-content {
@@ -990,35 +903,35 @@ footer {
     h1 {
         font-size: 2.2rem;
     }
-
+    
     h2 {
         font-size: 1.8rem;
     }
-
+    
     .hero {
         padding: 4rem 0;
     }
-
+    
     header .container {
         padding: 0 10px;
     }
-
+    
     nav ul {
         gap: 1rem;
     }
-
+    
     .feedback-option {
         padding: 1.2rem;
     }
-
+    
     .download-card {
         padding: 1.5rem;
     }
-
+    
     #step-list {
         padding-left: 1rem;
     }
-
+    
     .feedback-option .icon {
         font-size: 1.5rem;
         margin-right: 0.5rem;
@@ -1031,36 +944,36 @@ footer {
         padding: 1rem 10px;
         flex-direction: column;
     }
-
+    
     nav ul {
         flex-wrap: wrap;
         justify-content: center;
         margin-top: 1rem;
     }
-
+    
     .auth-container {
         padding: 1.5rem;
     }
-
+    
     .feedback-options {
         gap: 1rem;
     }
-
+    
     #auth-status.logged-in .dropdown-menu {
         position: fixed;
         top: 60px;
         right: 10px;
         width: 200px;
     }
-
+    
     .download-card {
         padding: 1.2rem;
     }
-
+    
     #step-list {
         font-size: 0.9rem;
     }
-
+    
     .download-link {
         padding: 0.7rem 1.5rem;
         font-size: 1rem;
@@ -1087,33 +1000,15 @@ footer {
 
 /* Fun animation for the beta tag */
 @keyframes shake {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    25% {
-        transform: rotate(5deg);
-    }
-
-    50% {
-        transform: rotate(0deg);
-    }
-
-    75% {
-        transform: rotate(-5deg);
-    }
-
-    100% {
-        transform: rotate(0deg);
-    }
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
 }
 
 .beta-badge:hover {
     animation: shake 0.5s ease-in-out;
-}
-
-#feedback-login-prompt p {
-    padding-bottom: 34px;
 }
 
 /* Animated background for the hero */
@@ -1121,11 +1016,9 @@ footer {
     0% {
         background-position: 0% 50%;
     }
-
     50% {
         background-position: 100% 50%;
     }
-
     100% {
         background-position: 0% 50%;
     }
@@ -1202,15 +1095,10 @@ footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1100;
-    /* Higher than auth-overlay */
+    z-index: 1100; /* Higher than auth-overlay */
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    background-image:
-        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
-    background-size: calc(var(--grid-size) * 2) calc(var(--grid-size) * 2);
 }
 
 .admin-portal.active {
@@ -1223,14 +1111,12 @@ footer {
     padding: 2.5rem;
     border-radius: var(--border-radius);
     width: 90%;
-    max-width: 700px;
-    /* Wider for admin portal */
+    max-width: 700px; /* Wider for admin portal */
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transform: translateY(-20px);
     transition: transform 0.3s ease;
-    overflow-y: auto;
-    /* In case content is long */
+    overflow-y: auto; /* In case content is long */
     max-height: 85vh;
 }
 
@@ -1278,10 +1164,8 @@ footer {
 
 /* Login Mode Separator (Optional - for visual separation) */
 .login-mode-separator {
-    margin: 0 0.5em;
-    /* Adjust spacing as needed */
-    color: var(--light-text);
-    /* Or a color that fits your design */
+    margin: 0 0.5em; /* Adjust spacing as needed */
+    color: var(--light-text); /* Or a color that fits your design */
 }
 
 /* Admin Mode Header Styling */
@@ -1299,11 +1183,11 @@ footer {
 #auth-status.admin-mode-header .dropdown-menu {
     background-color: white;
     border: 1px solid #eee;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 /* Hide regular nav items in admin mode */
-#auth-status.admin-mode-header~nav ul li:not(#auth-status) {
+#auth-status.admin-mode-header ~ nav ul li:not(#auth-status) {
     display: none;
 }
 
@@ -1316,7 +1200,7 @@ footer {
     padding: 16px 20px;
     background-color: white;
     border-radius: var(--border-radius);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     z-index: 2000;
     transform: translateX(110%);
     transition: transform 0.3s ease;
@@ -1627,17 +1511,12 @@ nav ul {
 }
 
 /* Form elements that should have interactive cursor */
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
     cursor: var(--cursor-interactive);
 }
 
 /* Close buttons and interactive actions */
-.close-auth,
-.close-modal,
-.close-alert,
-.close-admin {
+.close-auth, .close-modal, .close-alert, .close-admin {
     cursor: var(--cursor-interactive);
 }
 
@@ -1647,29 +1526,28 @@ nav ul {
 }
 
 /* Application buttons */
-.application-actions .approve-btn,
-.application-actions .deny-btn {
+.application-actions .approve-btn, .application-actions .deny-btn {
     cursor: var(--cursor-button);
 }
 
+/* Beta card hover effect - make sure to use the interactive cursor */
+.beta-card:hover, .download-card:hover, .feedback-option:hover {
+    cursor: var(--cursor-interactive);
+}
+
 /* Login and signup form buttons */
-#login-form button,
-#admin-login-form button,
-#beta-signup-form button,
-#bug-report-form button,
-#feature-form button,
-#experience-form button {
+#login-form button, #admin-login-form button, #beta-signup-form button,
+#bug-report-form button, #feature-form button, #experience-form button {
     cursor: var(--cursor-button);
 }
 
 /* Checkbox and radio buttons */
-input[type="checkbox"]+label,
-input[type="radio"]+label {
+input[type="checkbox"] + label, input[type="radio"] + label {
     cursor: var(--cursor-interactive);
 }
 
 /* Dropdown menu items */
-.dropdown-menu ul li a,
+.dropdown-menu ul li a, 
 .dropdown-menu ul li button {
     cursor: var(--cursor-interactive);
 }
@@ -1678,14 +1556,12 @@ input[type="radio"]+label {
 .install-section {
     cursor: var(--cursor-default);
 }
-
 .install-section:hover {
     cursor: var(--cursor-interactive);
 }
 
 /* Download links */
-.download-link,
-a[download] {
+.download-link, a[download] {
     cursor: var(--cursor-button);
 }
 
@@ -1700,8 +1576,8 @@ nav ul li a {
 }
 
 /* Star rating interaction */
-.rating input:checked~label,
+.rating input:checked ~ label,
 .rating label:hover,
-.rating label:hover~label {
+.rating label:hover ~ label {
     cursor: var(--cursor-interactive);
-}
+} 

@@ -1,0 +1,59 @@
+{
+  "rules": {
+    "applications": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$applicationId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()",
+        "status": {
+          ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        },
+        "betaCode": {
+          ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        }
+      }
+    },
+    "betaCodes": {
+      ".read": "auth != null",
+      "$betaCodeId": {
+        "email": {
+          ".write": "auth != null && (!data.exists() || data.val() == null || data.val() == '')"
+        },
+        ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+      },
+      ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+    },
+    "betaDownloads": {
+      ".read": "auth != null"
+    },
+    "feedback": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "bugs": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "features": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      },
+      "experiences": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
+    },
+    "notifications": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "admins": {
+      ".read": "auth != null",
+      ".write": "false"
+    },
+    "resignations": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).exists()",
+      ".write": "auth != null"
+    }
+  }
+} 

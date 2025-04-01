@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +10,6 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
     <header>
         <div class="container">
@@ -45,8 +43,7 @@
                             </div>
                             <div class="form-group" id="beta-code-group">
                                 <label for="beta-code">Beta Code</label>
-                                <input type="text" id="beta-code" name="betaCode" required
-                                    placeholder="Enter your unique beta code">
+                                <input type="text" id="beta-code" name="betaCode" required placeholder="Enter your unique beta code">
                             </div>
                             <div class="form-group hidden" id="login-password-group">
                                 <label for="login-password">Password</label>
@@ -54,8 +51,7 @@
                             </div>
                             <button type="submit" class="btn-primary">Log In</button>
                         </form>
-                        <p class="auth-message">Don't have a code? <a href="#signup-8ball"
-                                class="close-auth-redirect">Apply for beta access</a></p>
+                        <p class="auth-message">Don't have a code? <a href="#signup-8ball" class="close-auth-redirect">Apply for beta access</a></p>
                         <p class="auth-message" id="admin-login-switcher">
                             <a href="#" id="admin-login-link">Admin Login</a>
                             <a href="#" id="beta-login-link" class="hidden">Beta Tester Login</a>
@@ -68,8 +64,7 @@
         <section class="hero">
             <div class="container">
                 <h1>Help shape <span class="highlight">awesome</span> software!</h1>
-                <p>Test out my newest creations before they're officially released and give feedback that actually
-                    matters.</p>
+                <p>Test out my newest creations before they're officially released and give feedback that actually matters.</p>
                 <a href="#current-betas" class="btn-primary">See Current Betas</a>
             </div>
         </section>
@@ -84,8 +79,7 @@
                             <img src="images/8ball-playdate.png" alt="8ball for Playdate">
                             <h3>8ball</h3>
                             <p class="platform">Playdate Console</p>
-                            <p class="description">Predict your future with a not-so-magic 8 ball. Test your fate with
-                                the flip of a coin.</p>
+                            <p class="description">Predict your future with a not-so-magic 8 ball. Test your fate with the flip of a coin.</p>
                             <div class="card-actions">
                                 <a href="#signup-8ball" class="btn-secondary">Join Beta</a>
                                 <span class="beta-status">Active</span>
@@ -98,8 +92,7 @@
                             <div class="placeholder-image">?</div>
                             <h3>███████</h3>
                             <p class="platform">macOS</p>
-                            <p class="description">Something foggy is on the horizon... Sign up to be the first to know
-                                what's happening!</p>
+                            <p class="description">Something foggy is on the horizon... Sign up to be the first to know what's happening!</p>
                             <div class="card-actions">
                                 <a href="#notify-me" class="btn-outline">Notify Me</a>
                             </div>
@@ -165,8 +158,7 @@
                     </div>
                     <div class="form-group checkbox">
                         <input type="checkbox" id="terms" name="terms" required>
-                        <label for="terms">I agree to provide <b>constructive</b> feedback and report any bugs I
-                            find</label>
+                        <label for="terms">I agree to provide <b>constructive</b> feedback and report any bugs I find</label>
                     </div>
                     <button type="submit" class="btn-primary">Submit Application</button>
                     <p id="signup-message" class="form-message"></p>
@@ -179,8 +171,7 @@
                 <h2>Feedback Portal</h2>
                 <p>Already a beta tester? Share your thoughts, report bugs, or suggest improvements!</p>
                 <div id="feedback-login-prompt">
-                    <p class="login-prompt">Please <a href="#login" class="login-link">log in with your beta code</a> to
-                        submit feedback.</p>
+                    <p class="login-prompt">Please <a href="#login" class="login-link">log in with your beta code</a> to submit feedback.</p>
                 </div>
                 <div id="feedback-forms" class="feedback-forms hidden">
                     <div class="feedback-options">
@@ -191,13 +182,11 @@
                             <form id="bug-report-form" class="feedback-form">
                                 <div class="form-group">
                                     <label for="bug-title">Bug Title</label>
-                                    <input type="text" id="bug-title" name="title" required
-                                        placeholder="Brief description of the issue">
+                                    <input type="text" id="bug-title" name="title" required placeholder="Brief description of the issue">
                                 </div>
                                 <div class="form-group">
                                     <label for="bug-details">Bug Details</label>
-                                    <textarea id="bug-details" name="details" rows="5" required
-                                        placeholder="Steps to reproduce, expected behavior, actual behavior..."></textarea>
+                                    <textarea id="bug-details" name="details" rows="5" required placeholder="Steps to reproduce, expected behavior, actual behavior..."></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="bug-severity">Severity</label>
@@ -218,13 +207,11 @@
                             <form id="feature-form" class="feedback-form">
                                 <div class="form-group">
                                     <label for="feature-title">Feature Title</label>
-                                    <input type="text" id="feature-title" name="title" required
-                                        placeholder="Name your brilliant idea">
+                                    <input type="text" id="feature-title" name="title" required placeholder="Name your brilliant idea">
                                 </div>
                                 <div class="form-group">
                                     <label for="feature-details">Feature Details</label>
-                                    <textarea id="feature-details" name="details" rows="5" required
-                                        placeholder="Describe your feature idea and why it would be valuable..."></textarea>
+                                    <textarea id="feature-details" name="details" rows="5" required placeholder="Describe your feature idea and why it would be valuable..."></textarea>
                                 </div>
                                 <button type="submit" class="btn-primary">Submit Feature Idea</button>
                             </form>
@@ -253,8 +240,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="experience-details">Your Thoughts</label>
-                                    <textarea id="experience-details" name="details" rows="5" required
-                                        placeholder="What did you like? What could be better?"></textarea>
+                                    <textarea id="experience-details" name="details" rows="5" required placeholder="What did you like? What could be better?"></textarea>
                                 </div>
                                 <button type="submit" class="btn-primary">Submit Feedback</button>
                             </form>
@@ -267,54 +253,47 @@
         <section id="download" class="download hidden">
             <div class="container">
                 <h2>Download Beta Builds</h2>
-                <p>As a beta tester, you have access to the latest builds. By downloading the game, you agree to <b>keep
-                        the game completely confidential, effective immediately and indefinitely</b>.</p>
+                <p>As a beta tester, you have access to the latest builds. By downloading the game, you agree to <b>keep the game completely confidential, effective immediately and indefinitely</b>.</p>
                 <div class="downloads">
                     <div class="download-card">
                         <img class="card-image" src="/images/8ball-preview.png">
                         <h3>8ball for Playdate b0.0 (beta)</h3>
-                        <p class="version-date">Updated: March 29, 2025</p>
-                        <p class="version-notes">First beta release.</p>
+                        <p class="version-date">Updated: March 26, 2025</p>
+                        <p class="version-notes">Initial beta release with basic functionality</p>
                         <br>
-                        <a href="#" id="secure-download-link" class="btn-primary" data-version="b0.0">Download .pdx</a>
+                        <a href="8ball.pdx.zip" download class="btn-primary download-link" data-version="0.1.2">Download .pdx</a>
                         <br>
                         <div id="spacer"></div>
-
+                        
                         <h2 id="step-title">Steps to Install</h2>
-
+                        
                         <div class="install-sections">
                             <div class="install-section">
                                 <h3>Installing on Playdate Hardware</h3>
                                 <ol class="install-list">
                                     <li>Download the "8ball.pdx.zip" file.</li>
                                     <li>Unzip the downloaded file to extract the "8ball.pdx" file.</li>
-                                    <li>Install "8ball.pdx" on your Playdate (check out the link below to learn how).
-                                    </li>
-                                    <li>Play and report bugs, suggest features, and share your experience to earn
-                                        <b>brownie points</b>!</li>
+                                    <li>Install "8ball.pdx" on your Playdate (check out the link below to learn how).</li>
+                                    <li>Play and report bugs, suggest features, and share your experience to earn <b>brownie points</b>!</li>
                                 </ol>
                                 <div class="reference-link">
-                                    <a href="https://help.play.date/games/sideloading/" target="_blank">Learn more about
-                                        sideloading at help.play.date</a>
+                                    <a href="https://help.play.date/games/sideloading/" target="_blank">Learn more about sideloading at help.play.date</a>
                                 </div>
                                 <br>
                                 <div class="platform-tag">Playdate Console</div>
                             </div>
-
+                            
                             <div class="install-section">
                                 <h3>Running in Playdate Simulator</h3>
                                 <ol class="install-list">
                                     <li>Download the "8ball.pdx.zip" file.</li>
                                     <li>Unzip the downloaded file to extract the "8ball.pdx" file.</li>
-                                    <li>Make sure you have the <a href="https://play.date/dev/" target="_blank">Playdate
-                                            SDK</a> installed.</li>
+                                    <li>Make sure you have the <a href="https://play.date/dev/" target="_blank">Playdate SDK</a> installed.</li>
                                     <li>Open the "8ball.pdx" file with Playdate Simulator.</li>
-                                    <li>Play and report bugs, suggest features, and share your experience to earn
-                                        <b>brownie points</b>!</li>
+                                    <li>Play and report bugs, suggest features, and share your experience to earn <b>brownie points</b>!</li>
                                 </ol>
                                 <div class="reference-link">
-                                    <a href="https://sdk.play.date/inside-playdate" target="_blank">Review the Playdate
-                                        SDK documentation for more details</a>
+                                    <a href="https://sdk.play.date/inside-playdate" target="_blank">Review the Playdate SDK documentation for more details</a>
                                 </div>
                                 <br>
                                 <div class="platform-tag">macOS / Windows / Linux</div>
@@ -449,5 +428,4 @@
 
     <script src="script.js"></script>
 </body>
-
-</html>
+</html> 
