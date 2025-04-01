@@ -1580,4 +1580,11 @@ nav ul li a {
 .rating label:hover,
 .rating label:hover ~ label {
     cursor: var(--cursor-interactive);
+}
+
+/* Download Button Disabled State */
+.download-link.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
 } 

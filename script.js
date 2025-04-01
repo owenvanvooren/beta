@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userRatingsList = document.getElementById('user-ratings-list');
     const viewWebsiteBtn = document.getElementById('view-website-btn'); // ✅ Get the "View Website" button
 
+    // DOM Elements (Add download button)
+    const downloadButton = document.querySelector('.download-link');
+
     // Check for existing session
     const checkExistingSession = () => {
         const savedSession = localStorage.getItem('betaUserSession');
@@ -128,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Admin Login Switcher Link Event Listener
         if (adminLoginLink) {
-            adminLoginLink.addEventListener('click', (e) => {
+            adminLoginLink.addEventListener("click", (e) => {
                 e.preventDefault();
                 toggleAdminLoginMode();
             });
@@ -1171,9 +1174,80 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     };
     
+    // Initialize download button
+    const initDownloadButton = () => {
+        if (downloadButton) {
+            downloadButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                if (!currentUser) {
+                    showCustomAlert('Please log in to download beta files.', 'error');
+                    return;
+                }
+                
+                try {
+                    // Show loading status
+                    downloadButton.textContent = 'Downloading...';
+                    downloadButton.classList.add('disabled');
+                    
+                    // Get reference to the beta download in Firebase
+                    const dbRef = ref(database);
+                    const snapshot = await get(child(dbRef, 'betaDownloads/8ball-playdate/base64String'));
+                    
+                    if (snapshot.exists()) {
+                        const base64String = snapshot.val();
+                        
+                        // Convert base64 to blob
+                        const byteCharacters = atob(base64String);
+                        const byteArrays = [];
+                        
+                        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                            const slice = byteCharacters.slice(offset, offset + 512);
+                            
+                            const byteNumbers = new Array(slice.length);
+                            for (let i = 0; i < slice.length; i++) {
+                                byteNumbers[i] = slice.charCodeAt(i);
+                            }
+                            
+                            const byteArray = new Uint8Array(byteNumbers);
+                            byteArrays.push(byteArray);
+                        }
+                        
+                        const blob = new Blob(byteArrays, {type: 'application/zip'});
+                        
+                        // Create a link to download the blob
+                        const url = window.URL.createObjectURL(blob);
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = url;
+                        downloadLink.download = '8ball.pdx.zip';
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        
+                        // Clean up
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(downloadLink);
+                        
+                        showCustomAlert('Download started!', 'success');
+                    } else {
+                        showCustomAlert('Download file not found.', 'error');
+                    }
+                } catch (error) {
+                    console.error("Error downloading file:", error);
+                    showCustomAlert('Error downloading file. Please try again later.', 'error');
+                } finally {
+                    // Reset button state
+                    downloadButton.textContent = 'Download .pdx';
+                    downloadButton.classList.remove('disabled');
+                }
+            });
+        }
+    };
+    
     // Initialize everything
     initAuth();
     initFeedbackForms();
+    initAdminPortal();
+    initDownloadButton(); // Initialize the download button
 
     // Add this custom alert function to script.js
     const showCustomAlert = (message, type = 'info') => {
