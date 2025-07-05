@@ -913,11 +913,32 @@ footer {
     }
     
     header .container {
-        padding: 0 10px;
+        padding: 0 15px;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
     }
     
     nav ul {
-        gap: 1rem;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 250px;
+        flex-direction: column;
+        background-color: white;
+        padding: 80px 20px 30px;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 140;
+        margin: 0;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+    
+    nav.active ul {
+        right: 0;
     }
     
     .feedback-option {
@@ -936,23 +957,46 @@ footer {
         font-size: 1.5rem;
         margin-right: 0.5rem;
     }
+    
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .install-sections {
+        gap: 1rem;
+    }
+    
+    /* Improved form responsiveness */
+    form {
+        padding: 1.5rem;
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+    
+    /* Better handling of beta cards */
+    .beta-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 576px) {
     header .container {
-        height: auto;
-        padding: 1rem 10px;
-        flex-direction: column;
+        height: 70px;
+        padding: 0 15px;
+        flex-direction: row;
+        justify-content: space-between;
     }
     
-    nav ul {
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 1rem;
+    .logo {
+        font-size: 1.5rem;
     }
     
     .auth-container {
         padding: 1.5rem;
+        width: 95%;
     }
     
     .feedback-options {
@@ -977,6 +1021,158 @@ footer {
     .download-link {
         padding: 0.7rem 1.5rem;
         font-size: 1rem;
+    }
+    
+    .steps {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Improved admin portal on mobile */
+    .admin-container {
+        padding: 1.5rem;
+        width: 95%;
+    }
+    
+    /* Better handling of the footer on mobile */
+    .footer-content {
+        padding: 0 15px;
+    }
+    
+    /* Fix for auth overlay on small screens */
+    .auth-overlay .auth-container {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    /* Full-width buttons on mobile */
+    .btn-primary, .btn-secondary, .btn-outline {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .card-image {
+        max-width: 100%;
+    }
+
+    .download {
+        padding: 3rem 0;
+    }
+
+    /* Better organization of installation steps on mobile */
+    .install-sections {
+        gap: 2rem;
+    }
+
+    .install-section {
+        padding: 1.2rem;
+    }
+
+    .install-section h3 {
+        font-size: 1.2rem;
+    }
+
+    .install-list li {
+        margin-bottom: 0.8rem;
+        line-height: 1.4;
+    }
+
+    /* Make the download button more prominent on mobile */
+    .download-link {
+        display: block;
+        padding: 1rem;
+        font-size: 1.1rem;
+        margin: 1.5rem 0;
+    }
+
+    /* Improve spacing in feedback forms on mobile */
+    .feedback-options {
+        gap: 1.2rem;
+    }
+
+    .feedback-option {
+        padding: 1.2rem;
+    }
+
+    .feedback-option h3 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .feedback-option h3::after {
+        margin-left: auto; /* Push arrow to right */
+    }
+
+    /* Improve rating input on small screens */
+    .rating {
+        font-size: 2.5rem;
+        justify-content: center;
+        margin: 0.5rem 0;
+    }
+
+    /* Make touch areas larger for rating stars */
+    .rating label {
+        padding: 0 0.3rem;
+    }
+}
+
+/* Fix for mobile menu backdrop */
+.menu-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 130;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Better handling of the admin portal scrolling on mobile */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1.5rem;
+        width: 95%;
+        max-height: 80vh;
+    }
+    
+    .admin-section {
+        margin-bottom: 2rem;
+    }
+    
+    .admin-section h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .application-card,
+    .feedback-card,
+    .resignation-card {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .admin-dashboard-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .admin-dashboard-actions button {
+        width: 100%;
+    }
+    
+    /* Better table display for small screens */
+    .feedback-data-list {
+        max-height: 250px;
+        overflow-y: auto;
     }
 }
 
@@ -1118,6 +1314,7 @@ footer {
     transition: transform 0.3s ease;
     overflow-y: auto; /* In case content is long */
     max-height: 85vh;
+    -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
 }
 
 .admin-portal.active .admin-container {
@@ -1587,4 +1784,374 @@ nav ul li a {
     opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+/* Mobile Navigation */
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: var(--cursor-interactive);
+    padding: 0;
+    z-index: 150;
+}
+
+.mobile-menu-toggle span {
+    width: 30px;
+    height: 3px;
+    background-color: var(--dark-color);
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+/* Menu open state for hamburger icon */
+nav.active ~ .mobile-menu-toggle span:nth-child(1) {
+    transform: rotate(45deg);
+}
+
+nav.active ~ .mobile-menu-toggle span:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+nav.active ~ .mobile-menu-toggle span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+/* Prevent body scroll when menu is open */
+body.menu-open {
+    overflow: hidden;
+}
+
+/* Special styles for mobile devices */
+.mobile-device .btn-primary,
+.mobile-device .btn-secondary,
+.mobile-device .btn-outline {
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+    touch-action: manipulation; /* Disable double-tap to zoom */
+}
+
+.mobile-device input[type="checkbox"],
+.mobile-device input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+
+/* Better form labels on mobile */
+@media (max-width: 576px) {
+    label {
+        font-size: 16px; /* Make sure labels are easily tappable */
+    }
+    
+    .checkbox label {
+        padding: 10px 0; /* Larger touch target */
+    }
+    
+    /* Fix scrolling on iOS */
+    .auth-overlay {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better handling of auth dropdown on mobile */
+    #auth-status.logged-in:hover .dropdown-menu {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    #auth-status.logged-in.active .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Improve beta card display on mobile */
+    .beta-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Improve admin portal table display */
+    .feedback-card,
+    .application-card,
+    .resignation-card {
+        font-size: 0.9rem;
+        overflow-x: auto;
+        word-break: break-word;
+    }
+    
+    /* Better spacing for feedback options */
+    .feedback-option {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Touch optimizations for mobile */
+@media (hover: none) {
+    /* Override hover effects with active state for touch devices */
+    .btn-primary:active,
+    .btn-secondary:active,
+    .btn-outline:active {
+        transform: scale(0.98);
+    }
+    
+    /* Better handling of mobile navigation */
+    nav ul {
+        gap: 1.5rem;
+    }
+    
+    /* Improve tap areas for all interactive elements */
+    a, button, input[type="submit"], input[type="button"] {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Fix for hover states on mobile */
+    .beta-card:hover,
+    .download-card:hover,
+    nav a:hover::after {
+        transform: none;
+    }
+    
+    /* Better tap areas for checkboxes and radio buttons */
+    input[type="checkbox"] + label,
+    input[type="radio"] + label {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Further optimizations for very small screens */
+@media (max-width: 360px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    .beta-badge {
+        font-size: 0.7rem;
+    }
+    
+    /* Improved vertical spacing */
+    section {
+        padding: 2.5rem 0;
+    }
+    
+    .container {
+        padding: 0 10px;
+    }
+    
+    /* Make sure form elements fit on very small screens */
+    form {
+        padding: 1rem;
+    }
+    
+    /* Adjust auth container width */
+    .auth-container {
+        width: 98%;
+        padding: 1.2rem;
+    }
+    
+    /* Better card layout for tiny screens */
+    .beta-card img,
+    .placeholder-image {
+        height: 150px;
+    }
+    
+    /* Make sure buttons don't overflow */
+    .card-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+    
+    .beta-status {
+        align-self: flex-start;
+    }
+}
+
+/* Fix for iPhone notch and bottom safe area */
+@supports (padding: max(0px)) {
+    .auth-overlay,
+    .admin-portal {
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    header {
+        padding-top: max(1.5rem, env(safe-area-inset-top));
+    }
+    
+    footer {
+        padding-bottom: max(3rem, env(safe-area-inset-bottom));
+    }
+}
+
+/* Mobile Navigation */
+.mobile-actions {
+    display: none;
+    align-items: center;
+    gap: 15px;
+}
+
+.mobile-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+    transition: var(--transition);
+    position: relative;
+}
+
+.mobile-login-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.mobile-login-btn:hover, 
+.mobile-login-btn:active {
+    color: var(--primary-color);
+}
+
+/* User logged in state for mobile button */
+.mobile-login-btn.logged-in::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+}
+
+.mobile-login-btn.admin-mode::after {
+    background-color: var(--accent-color);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: var(--cursor-interactive);
+    padding: 0;
+    z-index: 150;
+}
+
+.mobile-menu-toggle span {
+    width: 30px;
+    height: 3px;
+    background-color: var(--dark-color);
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+    
+    .hero {
+        padding: 4rem 0;
+    }
+    
+    header .container {
+        padding: 0 15px;
+    }
+    
+    .mobile-actions {
+        display: flex;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    /* Hide the login link in the mobile menu since we now have a dedicated button */
+    nav #auth-status {
+        display: none;
+    }
+    
+    nav ul {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 250px;
+        flex-direction: column;
+        background-color: white;
+        padding: 80px 20px 30px;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 140;
+        margin: 0;
+        gap: 2rem;
+        align-items: flex-start;
+    }
+    
+    nav.active ul {
+        right: 0;
+    }
+    
+    .feedback-option {
+        padding: 1.2rem;
+    }
+    
+    .download-card {
+        padding: 1.5rem;
+    }
+    
+    #step-list {
+        padding-left: 1rem;
+    }
+    
+    .feedback-option .icon {
+        font-size: 1.5rem;
+        margin-right: 0.5rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    .install-sections {
+        gap: 1rem;
+    }
+    
+    /* Improved form responsiveness */
+    form {
+        padding: 1.5rem;
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+    
+    /* Better handling of beta cards */
+    .beta-cards {
+        grid-template-columns: 1fr;
+    }
 } 

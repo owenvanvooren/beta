@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const authOverlay = document.getElementById('auth-overlay');
     const loginLink = document.getElementById('login-link');
+    const mobileLoginLink = document.getElementById('mobile-login-link');
     const closeAuthBtns = document.querySelectorAll('.close-auth');
     const loginForm = document.getElementById('login-form');
     const authStatus = document.getElementById('auth-status');
@@ -19,6 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const featureForm = document.getElementById('feature-form');
     const experienceForm = document.getElementById('experience-form');
     const closeAuthRedirects = document.querySelectorAll('.close-auth-redirect');
+    
+    // Mobile Navigation Elements
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const nav = document.querySelector('nav');
+    const menuBackdrop = document.querySelector('.menu-backdrop');
+    const navLinks = document.querySelectorAll('nav ul li a');
     
     // Beta Application Form
     const betaSignupForm = document.getElementById('beta-signup-form');
@@ -42,20 +49,69 @@ document.addEventListener('DOMContentLoaded', () => {
     let isAdminLoginMode = false;
     
     // DOM Elements (Get beta code input element)
-    const betaCodeInput = document.getElementById('beta-code'); // ✅ Get the beta code input element
+    const betaCodeInput = document.getElementById('beta-code');
 
     // DOM Elements (Get beta login link element)
-    const betaLoginLink = document.getElementById('beta-login-link'); // ✅ Get the beta login link element
+    const betaLoginLink = document.getElementById('beta-login-link');
 
     // DOM Elements (Admin Portal - Add new lists)
     const bugReportsList = document.getElementById('bug-reports-list');
     const featureRequestsList = document.getElementById('feature-requests-list');
     const userRatingsList = document.getElementById('user-ratings-list');
-    const viewWebsiteBtn = document.getElementById('view-website-btn'); // ✅ Get the "View Website" button
+    const viewWebsiteBtn = document.getElementById('view-website-btn');
 
     // DOM Elements (Add download button)
     const downloadButton = document.querySelector('.download-link');
 
+    // Initialize Mobile Menu
+    const initMobileMenu = () => {
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+        }
+        
+        if (menuBackdrop) {
+            menuBackdrop.addEventListener('click', closeMobileMenu);
+        }
+        
+        // Close mobile menu when clicking a nav link
+        navLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Mobile login button functionality
+        if (mobileLoginLink) {
+            mobileLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // If user is logged in, show dropdown instead of auth overlay
+                if (currentUser) {
+                    showMobileUserMenu(e);
+                } else {
+                    authOverlay.classList.add('active');
+                }
+            });
+        }
+    };
+    
+    // Toggle Mobile Menu
+    const toggleMobileMenu = () => {
+        nav.classList.toggle('active');
+        menuBackdrop.classList.toggle('active');
+        document.body.classList.toggle('menu-open');
+        
+        // Toggle accessibility attributes
+        const expanded = mobileMenuToggle.getAttribute('aria-expanded') === 'true' || false;
+        mobileMenuToggle.setAttribute('aria-expanded', !expanded);
+    };
+    
+    // Close Mobile Menu
+    const closeMobileMenu = () => {
+        nav.classList.remove('active');
+        menuBackdrop.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    };
+    
     // Check for existing session
     const checkExistingSession = () => {
         const savedSession = localStorage.getItem('betaUserSession');
@@ -141,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (betaLoginLink) {
             betaLoginLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                toggleAdminLoginMode(); // Call toggleAdminLoginMode to switch back
+                toggleAdminLoginMode();
             });
         }
         
@@ -164,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         adminLoginMessage.textContent = 'Admin login successful!';
                         adminLoginMessage.className = 'form-message success';
                         authOverlay.classList.remove('active');
-                        signInUser(email, null); // Call signInUser for admin login, betaCode is null
+                        signInUser(email, null);
                         showCustomAlert('Admin login successful!', 'success');
                     } catch (error) {
                         console.error("Admin login error:", error);
@@ -244,8 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loginSubmitButton.textContent = 'Admin Log In';
             signupLinkAuthMessage.classList.add('hidden');
             betaCodeInput.removeAttribute('required');
-            betaLoginLink.classList.remove('hidden'); // ✅ Show "Back to Beta Login" link
-            adminLoginLink.classList.add('hidden'); // ✅ Hide "Admin Login" link to prevent double-switching
+            betaLoginLink.classList.remove('hidden');
+            adminLoginLink.classList.add('hidden');
         } else {
             // Switch back to Beta Code Login Mode (Default)
             loginSectionTitle.textContent = 'Log In to Beta Access';
@@ -255,8 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loginSubmitButton.textContent = 'Log In';
             signupLinkAuthMessage.classList.remove('hidden');
             betaCodeInput.setAttribute('required', '');
-            betaLoginLink.classList.add('hidden'); // ✅ Hide "Back to Beta Login" link
-            adminLoginLink.classList.remove('hidden'); // ✅ Show "Admin Login" link
+            betaLoginLink.classList.add('hidden');
+            adminLoginLink.classList.remove('hidden');
         }
     };
     
@@ -338,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const adminEmails = ['owen@owen.uno'];
         if (adminEmails.includes(email)) {
             currentUser.isAdmin = true;
-            showAdminDashboard(); // Function to show admin dashboard
+            showAdminDashboard();
         } else {
             currentUser.isAdmin = false;
         }
@@ -373,13 +429,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to load beta applications from Firebase
     const loadBetaApplications = () => {
-        applicationsList.innerHTML = '<p>Loading beta applications...</p>'; // Initial loading message
+        applicationsList.innerHTML = '<p>Loading beta applications...</p>';
 
         const applicationsRef = ref(database, 'applications');
 
         onValue(applicationsRef, (snapshot) => {
             if (snapshot.exists()) {
-                applicationsList.innerHTML = ''; // Clear loading message
+                applicationsList.innerHTML = '';
                 const applicationsData = snapshot.val();
 
                 Object.keys(applicationsData).forEach(appId => {
@@ -399,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     applicationsList.appendChild(appCard);
                 });
-                // Add event listeners for Approve/Deny buttons after they are created (important!)
                 attachActionButtonsListeners();
             } else {
                 applicationsList.innerHTML = '<p>No beta applications yet.</p>';
@@ -480,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             adminLoginMessage.textContent = `Application approved! Beta code ${newBetaCode} created for ${userEmail}.`;
             adminLoginMessage.className = 'form-message success';
-            loadBetaApplications(); // Refresh application list
+            loadBetaApplications();
             showCustomAlert(`Application approved! User can now log in with their email and beta code: ${newBetaCode}`, 'success');
 
         } catch (error) {
@@ -494,7 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to generate a random beta code
     const generateBetaCode = () => {
         // Generate a 8-character code with letters and numbers
-        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed similar-looking characters
+        const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let result = '';
         for (let i = 0; i < 8; i++) {
             result += characters.charAt(Math.floor(Math.random() * characters.length));
@@ -569,6 +624,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 authStatus.classList.remove('admin-mode-header');
             }
 
+            // Update mobile login button state
+            if (mobileLoginLink) {
+                mobileLoginLink.classList.add('logged-in');
+                if (isAdmin) {
+                    mobileLoginLink.classList.add('admin-mode');
+                } else {
+                    mobileLoginLink.classList.remove('admin-mode');
+                }
+                mobileLoginLink.setAttribute('aria-label', isAdmin ? 'Admin settings' : 'User settings');
+            }
+
             // Show feedback forms and hide login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.add('hidden');
             if (feedbackForms) feedbackForms.classList.remove('hidden');
@@ -590,6 +656,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // Only add dropdown if it doesn't already exist
             if (!authStatus.querySelector('.dropdown-menu')) {
                 authStatus.appendChild(dropdown);
+                
+                // Mobile-friendly dropdown toggle
+                const isMobile = window.innerWidth <= 768;
+                if (isMobile) {
+                    loginLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        authStatus.classList.toggle('active');
+                    });
+                    
+                    document.addEventListener('click', (e) => {
+                        if (!authStatus.contains(e.target)) {
+                            authStatus.classList.remove('active');
+                        }
+                    });
+                }
                 
                 // Sign out button event listener
                 document.getElementById('sign-out-btn').addEventListener('click', signOutUser);
@@ -615,6 +696,13 @@ document.addEventListener('DOMContentLoaded', () => {
             loginLink.textContent = 'Log In';
             loginLink.href = '#login';
             authStatus.classList.remove('admin-mode-header');
+            
+            // Update mobile login button state
+            if (mobileLoginLink) {
+                mobileLoginLink.classList.remove('logged-in');
+                mobileLoginLink.classList.remove('admin-mode');
+                mobileLoginLink.setAttribute('aria-label', 'Log in');
+            }
             
             // Hide feedback forms and show login prompt
             if (feedbackLoginPrompt) feedbackLoginPrompt.classList.remove('hidden');
@@ -1003,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
 
             const targetHref = this.getAttribute('href');
-            if (targetHref && targetHref !== "#" && targetHref !== '') { // ✅ Check for empty or just '#' href
+            if (targetHref && targetHref !== "#" && targetHref !== '') {
                 const targetId = targetHref;
                 const targetElement = document.querySelector(targetId);
 
@@ -1047,7 +1135,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     adminLoginForm.classList.add('hidden');
                     adminDashboard.classList.remove('hidden');
                     adminLoginMessage.textContent = '';
-                    // loadBetaApplications();
                     showCustomAlert('Admin login successful!', 'success');
                 } catch (error) {
                     console.error("Admin login error:", error);
@@ -1099,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const reportsData = snapshot.val();
                 Object.keys(reportsData).forEach(reportId => {
                     const report = reportsData[reportId];
-                    const reportCard = createFeedbackCard(report, 'bug'); // Re-use or create a card function
+                    const reportCard = createFeedbackCard(report, 'bug');
                     bugReportsList.appendChild(reportCard);
                 });
             } else {
@@ -1121,7 +1208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const requestsData = snapshot.val();
                 Object.keys(requestsData).forEach(requestId => {
                     const request = requestsData[requestId];
-                    const requestCard = createFeedbackCard(request, 'feature'); // Re-use or create a card function
+                    const requestCard = createFeedbackCard(request, 'feature');
                     featureRequestsList.appendChild(requestCard);
                 });
             } else {
@@ -1143,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ratingsData = snapshot.val();
                 Object.keys(ratingsData).forEach(ratingId => {
                     const rating = ratingsData[ratingId];
-                    const ratingCard = createFeedbackCard(rating, 'rating'); // Re-use or create a card function
+                    const ratingCard = createFeedbackCard(rating, 'rating');
                     userRatingsList.appendChild(ratingCard);
                 });
             } else {
@@ -1158,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper function to create a feedback card (reusable for bugs, features, ratings)
     const createFeedbackCard = (feedback, type) => {
         const card = document.createElement('div');
-        card.className = 'feedback-card'; // You might want to style this in CSS
+        card.className = 'feedback-card';
         let cardContent = `
             <h4>${feedback.title || (type === 'rating' ? 'User Rating' : 'No Title')}</h4>
             <p>Submitted by: ${feedback.submittedBy}</p>
@@ -1244,12 +1331,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     // Initialize everything
+    initMobileMenu();
     initAuth();
     initFeedbackForms();
     initAdminPortal();
-    initDownloadButton(); // Initialize the download button
+    initDownloadButton();
 
-    // Add this custom alert function to script.js
+    // Add device type detection for better mobile experience
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        document.body.classList.add('mobile-device');
+    }
+
+    // Adjust form elements for better mobile input handling
+    const adjustFormsForMobile = () => {
+        if (isMobile) {
+            // Fix iOS zoom on input focus
+            const metaViewport = document.querySelector('meta[name="viewport"]');
+            if (metaViewport) {
+                metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+            }
+            
+            // Better touch handling for mobile inputs
+            const allInputs = document.querySelectorAll('input, textarea, select');
+            allInputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.dataset.scrollY = window.scrollY;
+                });
+                
+                input.addEventListener('blur', () => {
+                    if (input.dataset.scrollY) {
+                        setTimeout(() => {
+                            window.scrollTo(0, parseInt(input.dataset.scrollY || '0'));
+                        }, 100);
+                    }
+                });
+            });
+        }
+    };
+    
+    adjustFormsForMobile();
+
+    // Custom alert function (existing)
     const showCustomAlert = (message, type = 'info') => {
         // Check if the custom alert container exists
         let alertContainer = document.querySelector('.custom-alert');
@@ -1391,6 +1514,148 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             adminContainer.insertBefore(closeButton, adminContainer.firstChild.nextSibling);
+        }
+    };
+
+    // Show mobile user menu (dropdown) when logged in
+    const showMobileUserMenu = (e) => {
+        // Check if dropdown already exists and remove it if it does
+        const existingDropdown = document.querySelector('.mobile-user-dropdown');
+        if (existingDropdown) {
+            existingDropdown.remove();
+            return;
+        }
+        
+        // Create dropdown for mobile user menu
+        const dropdown = document.createElement('div');
+        dropdown.className = 'mobile-user-dropdown';
+        
+        const isAdmin = currentUser && currentUser.isAdmin;
+        
+        dropdown.innerHTML = `
+            <div class="dropdown-arrow"></div>
+            <ul>
+                <li class="user-email">${currentUser.email}</li>
+                ${isAdmin ? `<li><a href="#admin-portal" id="mobile-admin-portal-link">Admin Portal</a></li>` : ''}
+                <li><button id="mobile-sign-out-btn">Sign Out</button></li>
+                ${!isAdmin ? `<li><button id="mobile-resign-btn" class="resign-btn">Resign from Testing</button></li>` : ''}
+            </ul>
+        `;
+        
+        document.body.appendChild(dropdown);
+        
+        // Position dropdown below mobile login button
+        const buttonRect = mobileLoginLink.getBoundingClientRect();
+        dropdown.style.top = `${buttonRect.bottom + window.scrollY + 10}px`;
+        dropdown.style.left = `${buttonRect.left + window.scrollX - 100}px`;
+        
+        // Add event listeners to dropdown items
+        const signOutBtn = document.getElementById('mobile-sign-out-btn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', signOutUser);
+        }
+        
+        const adminPortalLink = document.getElementById('mobile-admin-portal-link');
+        if (adminPortalLink) {
+            adminPortalLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                adminPortal.classList.remove('hidden');
+                adminPortal.classList.remove('initially-hidden');
+                adminPortal.classList.add('active');
+                document.querySelector('.mobile-user-dropdown').remove();
+            });
+        }
+        
+        const resignBtn = document.getElementById('mobile-resign-btn');
+        if (resignBtn) {
+            resignBtn.addEventListener('click', handleResignFromTesting);
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function closeDropdown(event) {
+            if (!dropdown.contains(event.target) && event.target !== mobileLoginLink) {
+                dropdown.remove();
+                document.removeEventListener('click', closeDropdown);
+            }
+        });
+        
+        // Add CSS for mobile dropdown
+        if (!document.getElementById('mobile-dropdown-styles')) {
+            const style = document.createElement('style');
+            style.id = 'mobile-dropdown-styles';
+            style.textContent = `
+                .mobile-user-dropdown {
+                    position: absolute;
+                    background-color: white;
+                    border-radius: 8px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    width: 200px;
+                    animation: fadeIn 0.2s ease;
+                }
+                
+                .mobile-user-dropdown .dropdown-arrow {
+                    position: absolute;
+                    top: -8px;
+                    right: 110px;
+                    width: 0;
+                    height: 0;
+                    border-left: 8px solid transparent;
+                    border-right: 8px solid transparent;
+                    border-bottom: 8px solid white;
+                }
+                
+                .mobile-user-dropdown ul {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                
+                .mobile-user-dropdown li {
+                    padding: 0;
+                }
+                
+                .mobile-user-dropdown .user-email {
+                    padding: 10px 15px;
+                    border-bottom: 1px solid #eee;
+                    font-weight: bold;
+                    color: var(--primary-color);
+                    font-size: 0.9rem;
+                    text-align: center;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                .mobile-user-dropdown a,
+                .mobile-user-dropdown button {
+                    display: block;
+                    width: 100%;
+                    padding: 12px 15px;
+                    text-align: left;
+                    background: none;
+                    border: none;
+                    cursor: var(--cursor-interactive);
+                    font-size: 0.9rem;
+                    color: var(--text-color);
+                }
+                
+                .mobile-user-dropdown a:hover,
+                .mobile-user-dropdown button:hover {
+                    background-color: #f5f5f5;
+                    color: var(--primary-color);
+                }
+                
+                .mobile-user-dropdown .resign-btn {
+                    color: var(--secondary-color);
+                    border-top: 1px solid #eee;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
         }
     };
 }); 
